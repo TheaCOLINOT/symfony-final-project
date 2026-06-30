@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil - Salon de Massage{% endblock %}
+
+{% block body %}
+<div style="max-width: 600px; margin: 50px auto; font-family: sans-serif;">
+    <h1>Bienvenue au Salon de Massage</h1>
+
+    {% if user %}
+        <p>Connexion réussie !</p>
+        <p>Bonjour <strong>{{ user.firstname }} {{ user.name }}</strong>.</p>
+        <p>Email : {{ user.email }}</p>
+        
+        <hr style="margin: 20px 0;">
+        <a href="#" style="display: inline-block; padding: 10px 20px; background: #2ecc71; color: white; text-decoration: none; border-radius: 5px;">Prendre un rendez-vous</a>
+        
+        <p style="margin-top: 30px;"><a href="{{ path('app_logout') }}">Se déconnecter</a></p>
+    {% else %}
+        <p>Vous n'êtes pas connecté.</p>
+        <a href="{{ path('app_login') }}">Se connecter</a> ou <a href="{{ path('app_register') }}">Créer un compte</a>
+    {% endif %}
+</div>
+{% endblock %}
