@@ -51,4 +51,19 @@ class UserRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
     }
+
+    /**
+     * @return list<User>
+     */
+    public function findManagersWithoutLocation(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->leftJoin('App\Entity\Manager', 'm', 'WITH', 'm.user = u')
+            ->andWhere('u.role = :role')
+            ->andWhere('m.id IS NULL OR m.location IS NULL')
+            ->setParameter('role', UserRole::Manager->value)
+            ->orderBy('u.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

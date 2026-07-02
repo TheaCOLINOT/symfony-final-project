@@ -13,7 +13,6 @@ security:
     role_hierarchy:
         ROLE_CAT: ROLE_USER
         ROLE_MANAGER: ROLE_USER
-        ROLE_ADMIN: ROLE_MANAGER
 
     firewalls:
         dev:
@@ -37,7 +36,7 @@ security:
     access_control:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
-        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/admin, roles: ROLE_MANAGER }
         - { path: ^/manager, roles: ROLE_MANAGER }
         - { path: ^/espace-cat, roles: ROLE_CAT }
 

@@ -17,6 +17,10 @@ final class ChangeUserRoleType extends AbstractType
             ->add('role', EnumType::class, [
                 'class' => UserRole::class,
                 'label' => 'Rôle',
+                'choices' => array_filter(
+                    UserRole::cases(),
+                    static fn (UserRole $role) => $role !== UserRole::Admin
+                ),
                 'choice_label' => static fn (UserRole $role) => $role->label(),
             ])
             ->add('submit', SubmitType::class, [

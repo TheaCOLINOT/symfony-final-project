@@ -11,7 +11,7 @@
         <nav style="padding: 15px 30px; background: #2c3e50; font-family: sans-serif;">
             <a href="{{ path('app_home') }}" style="color: white; text-decoration: none; margin-right: 20px;">Accueil</a>
 
-            {% if is_granted('ROLE_ADMIN') %}
+            {% if is_granted('GLOBAL_ADMIN') %}
                 <a href="{{ path('app_admin') }}" style="color: white; text-decoration: none; margin-right: 20px;">Administration</a>
             {% endif %}
 

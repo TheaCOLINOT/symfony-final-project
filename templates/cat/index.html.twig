@@ -2,15 +2,51 @@
 
 {% block title %}Espace spécialiste chat{% endblock %}
 
+{% block stylesheets %}
+<style>
+    .dashboard { max-width: 900px; margin: 40px auto; font-family: sans-serif; padding: 0 20px; }
+    .card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); margin-bottom: 20px; }
+    .muted { color: #6b7280; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; background: #ede9fe; color: #5b21b6; margin-right: 8px; margin-top: 8px; }
+</style>
+{% endblock %}
+
 {% block body %}
-<div style="max-width: 800px; margin: 50px auto; font-family: sans-serif;">
+<div class="dashboard">
     <h1>Espace spécialiste chat</h1>
 
     {% if user %}
         <p>Bonjour <strong>{{ user.firstname }} {{ user.name }}</strong>.</p>
-        <p>Vous avez accès aux services et réservations liés aux chats.</p>
+        <p class="muted">Consultez les chats et les services globaux gérés par les managers de salon.</p>
     {% endif %}
 
-    <p style="margin-top: 30px;"><a href="{{ path('app_home') }}">Retour à l'accueil</a></p>
+    <div class="card">
+        <h2>Services globaux disponibles</h2>
+        {% if available_services is empty %}
+            <p class="muted">Aucun service global n'a encore été créé.</p>
+        {% else %}
+            {% for service in available_services %}
+                <div class="badge">{{ service.title }} · {{ service.price }}€ · {{ service.duration }}</div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>Chats enregistrés</h2>
+        {% if cats is empty %}
+            <p class="muted">Aucun chat n'a encore été ajouté par un manager.</p>
+        {% else %}
+            <ul>
+                {% for cat in cats %}
+                    <li>
+                        <strong>{{ cat.speciality }}</strong> — {{ cat.specie }} ({{ cat.color }})
+                        {% if cat.location %}
+                            <br><span class="muted">Salon : {{ cat.location.city }}</span>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}

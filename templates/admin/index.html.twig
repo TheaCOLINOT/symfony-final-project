@@ -4,18 +4,26 @@
 
 {% block body %}
 <div style="max-width: 800px; margin: 50px auto; font-family: sans-serif;">
-    <h1>Administration</h1>
+    <h1>Administration globale</h1>
 
     {% if user %}
         <p>Bonjour <strong>{{ user.firstname }} {{ user.name }}</strong>.</p>
-        <p>Gérez la plateforme depuis cet espace réservé aux administrateurs.</p>
+        <p>Vous gérez la plateforme depuis la localisation globale.</p>
     {% endif %}
 
-    <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+    <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; margin-bottom: 16px;">
         <h2 style="margin-top: 0;">Gestion des utilisateurs</h2>
         <p>Consultez la liste des utilisateurs inscrits et modifiez leurs rôles.</p>
         <a href="{{ path('app_admin_users') }}" style="display: inline-block; padding: 10px 20px; background: #3498db; color: white; text-decoration: none; border-radius: 5px;">
             Gérer les rôles des utilisateurs
+        </a>
+    </div>
+
+    <div style="padding: 20px; background: #f8f9fa; border-radius: 8px;">
+        <h2 style="margin-top: 0;">Gestion des villes et salons</h2>
+        <p>Créez une localisation par ville et assignez un manager responsable.</p>
+        <a href="{{ path('app_admin_locations') }}" style="display: inline-block; padding: 10px 20px; background: #27ae60; color: white; text-decoration: none; border-radius: 5px;">
+            Gérer les salons par ville
         </a>
     </div>
 

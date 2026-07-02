@@ -22,7 +22,7 @@
             <p><a href="{{ path('app_manager') }}">Accéder à l'espace manager</a></p>
         {% endif %}
 
-        {% if is_granted('ROLE_ADMIN') %}
+        {% if is_granted('GLOBAL_ADMIN') %}
             <p><a href="{{ path('app_admin') }}">Accéder à l'administration</a></p>
         {% endif %}
 

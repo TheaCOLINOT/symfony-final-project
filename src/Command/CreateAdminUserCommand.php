@@ -2,8 +2,12 @@
 
 namespace App\Command;
 
+use App\Entity\Location;
+use App\Entity\Manager;
 use App\Entity\User;
 use App\Enum\UserRole;
+use App\Repository\LocationRepository;
+use App\Repository\ManagerRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -16,12 +20,14 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[AsCommand(
     name: 'app:create-admin-user',
-    description: 'Crée le compte administrateur par défaut s\'il n\'existe pas encore',
+    description: 'Crée le compte administrateur global, sa localisation et son profil manager',
 )]
 final class CreateAdminUserCommand extends Command
 {
     public function __construct(
         private readonly UserRepository $userRepository,
+        private readonly ManagerRepository $managerRepository,
+        private readonly LocationRepository $locationRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly UserPasswordHasherInterface $passwordHasher,
         #[Autowire('%env(ADMIN_EMAIL)%')]
@@ -36,23 +42,52 @@ final class CreateAdminUserCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        if ($this->userRepository->findOneBy(['email' => $this->adminEmail]) instanceof User) {
-            $io->success(sprintf('Le compte administrateur "%s" existe déjà.', $this->adminEmail));
+        $globalLocation = $this->locationRepository->findGlobalLocation();
+        if ($globalLocation !== null) {
+            $io->success('La localisation globale et le compte administrateur existent déjà.');
 
             return Command::SUCCESS;
         }
 
-        $admin = new User();
-        $admin->setEmail($this->adminEmail);
-        $admin->setName('Admin');
-        $admin->setFirstname('Super');
-        $admin->setUserRole(UserRole::Admin);
-        $admin->setPassword($this->passwordHasher->hashPassword($admin, $this->adminPassword));
+        $admin = $this->userRepository->findOneBy(['email' => $this->adminEmail]);
 
-        $this->entityManager->persist($admin);
+        if (!$admin instanceof User) {
+            $admin = new User();
+            $admin->setEmail($this->adminEmail);
+            $admin->setName('Admin');
+            $admin->setFirstname('Super');
+            $admin->setUserRole(UserRole::Manager);
+            $admin->setPassword($this->passwordHasher->hashPassword($admin, $this->adminPassword));
+            $this->entityManager->persist($admin);
+        } else {
+            $admin->setUserRole(UserRole::Manager);
+        }
+
+        $manager = $this->managerRepository->findOneByUser($admin);
+        if ($manager === null) {
+            $manager = new Manager();
+            $manager->setUser($admin);
+            $manager->setIsAdmin(true);
+            $this->entityManager->persist($manager);
+        } else {
+            $manager->setIsAdmin(true);
+        }
+
+        $globalLocation = new Location();
+        $globalLocation->setCity(Location::GLOBAL_CITY);
+        $globalLocation->setAddress('Plateforme centrale');
+        $globalLocation->setCountry('France');
+        $globalLocation->setIsGlobal(true);
+        $this->entityManager->persist($globalLocation);
+
+        $manager->setLocation($globalLocation);
+
         $this->entityManager->flush();
 
-        $io->success(sprintf('Compte administrateur créé : %s', $this->adminEmail));
+        $io->success(sprintf(
+            'Administrateur global créé (%s) avec la localisation globale.',
+            $this->adminEmail
+        ));
 
         return Command::SUCCESS;
     }

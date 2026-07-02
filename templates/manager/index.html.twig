@@ -2,15 +2,125 @@
 
 {% block title %}Espace manager{% endblock %}
 
+{% block stylesheets %}
+<style>
+    .dashboard { max-width: 1100px; margin: 40px auto; font-family: sans-serif; padding: 0 20px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+    .card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); }
+    .card h2 { margin-top: 0; }
+    .flash { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; }
+    .flash-success { background: #d4edda; color: #155724; }
+    .flash-error { background: #f8d7da; color: #721c24; }
+    .list { margin: 0; padding-left: 18px; }
+    .list li { margin-bottom: 12px; }
+    .muted { color: #6b7280; }
+    .salon-badge { display: inline-block; background: #dbeafe; color: #1e40af; padding: 6px 12px; border-radius: 8px; margin-bottom: 16px; }
+    form > div { margin-bottom: 14px; }
+    input, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db; box-sizing: border-box; }
+    button { background: #2563eb; color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; }
+    .services-list label { display: block; margin-bottom: 8px; }
+    .cat-card { margin-bottom: 20px; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
 {% block body %}
-<div style="max-width: 800px; margin: 50px auto; font-family: sans-serif;">
+<div class="dashboard">
     <h1>Espace manager</h1>
 
     {% if user %}
         <p>Bonjour <strong>{{ user.firstname }} {{ user.name }}</strong>.</p>
-        <p>Gérez vos locations, services et réservations depuis cet espace.</p>
     {% endif %}
 
-    <p style="margin-top: 30px;"><a href="{{ path('app_home') }}">Retour à l'accueil</a></p>
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="flash flash-{{ label }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    {% if no_location %}
+        <div class="card">
+            <p class="muted">Aucun salon ne vous est encore assigné. Contactez un administrateur global pour obtenir une localisation.</p>
+        </div>
+    {% else %}
+        <div class="salon-badge">
+            {% if is_global_admin %}
+                Localisation globale — accès administration
+            {% else %}
+                Salon : <strong>{{ managed_location.city }}</strong> — {{ managed_location.address }}
+            {% endif %}
+        </div>
+
+        {% if is_global_admin %}
+            <div class="card">
+                <p>En tant que manager de la localisation globale, utilisez l'<a href="{{ path('app_admin') }}">interface d'administration</a> pour créer des villes et assigner des managers.</p>
+                <p class="muted">Depuis cet espace, vous pouvez gérer les services globaux de la plateforme.</p>
+            </div>
+        {% endif %}
+
+        <div class="grid">
+            <section class="card">
+                <h2>Créer un service global</h2>
+                <p class="muted">Les services globaux sont disponibles pour tous les salons.</p>
+                {{ form_start(service_form) }}
+                    {{ form_row(service_form.title) }}
+                    {{ form_row(service_form.description) }}
+                    {{ form_row(service_form.duration) }}
+                    {{ form_row(service_form.price) }}
+                    <button type="submit">Créer le service</button>
+                {{ form_end(service_form) }}
+            </section>
+
+            {% if not is_global_admin and cat_form %}
+                <section class="card">
+                    <h2>Ajouter un chat au salon</h2>
+                    {{ form_start(cat_form) }}
+                        {{ form_row(cat_form.specie) }}
+                        {{ form_row(cat_form.color) }}
+                        {{ form_row(cat_form.speciality) }}
+                        <button type="submit">Ajouter le chat</button>
+                    {{ form_end(cat_form) }}
+                </section>
+            {% endif %}
+
+            <section class="card">
+                <h2>Services globaux</h2>
+                {% if services is empty %}
+                    <p class="muted">Aucun service global n'a encore été créé.</p>
+                {% else %}
+                    <ul class="list">
+                        {% for service in services %}
+                            <li>
+                                <strong>{{ service.title }}</strong> — {{ service.price }}€ ({{ service.duration }})<br>
+                                <span class="muted">{{ service.description }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </section>
+        </div>
+
+        {% if not is_global_admin %}
+            <h2 style="margin-top: 32px;">Chats de votre salon</h2>
+            {% if cats is empty %}
+                <div class="card">
+                    <p class="muted">Aucun chat n'a encore été ajouté à ce salon.</p>
+                </div>
+            {% else %}
+                {% for cat in cats %}
+                    <div class="card cat-card">
+                        <h3>{{ cat.speciality }}</h3>
+                        <p><strong>Espèce :</strong> {{ cat.specie }} · <strong>Couleur :</strong> {{ cat.color }}</p>
+
+                        <h4>Services proposés par ce chat</h4>
+                        {{ form_start(service_forms[cat.id], { attr: { class: 'services-list' } }) }}
+                            {{ form_widget(service_forms[cat.id].services) }}
+                            <button type="submit">Mettre à jour les services</button>
+                        {{ form_end(service_forms[cat.id]) }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endif %}
+    {% endif %}
 </div>
 {% endblock %}
