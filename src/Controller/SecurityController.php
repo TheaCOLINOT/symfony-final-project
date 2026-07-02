@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Enum\UserRole;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -36,7 +37,7 @@ class SecurityController extends AbstractController
             $user->setName($request->request->get('name'));
             $user->setFirstname($request->request->get('firstname'));
             $user->setPhone($request->request->get('phone'));
-            $user->setRole('ROLE_USER'); // Rôle par défaut requis par Symfony
+            $user->setUserRole(UserRole::User);
 
             // Encodage sécurisé du mot de passe
             $hashedPassword = $passwordHasher->hashPassword(

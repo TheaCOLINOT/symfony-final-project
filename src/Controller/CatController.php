@@ -7,13 +7,13 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[IsGranted('ROLE_MANAGER')]
-final class ManagerController extends AbstractController
+#[IsGranted('ROLE_CAT')]
+final class CatController extends AbstractController
 {
-    #[Route('/manager', name: 'app_manager')]
+    #[Route('/espace-cat', name: 'app_cat')]
     public function index(): Response
     {
-        return $this->render('manager/index.html.twig', [
+        return $this->render('cat/index.html.twig', [
             'user' => $this->getUser(),
         ]);
     }

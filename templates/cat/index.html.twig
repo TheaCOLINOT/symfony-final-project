@@ -1,14 +1,14 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Espace manager{% endblock %}
+{% block title %}Espace spécialiste chat{% endblock %}
 
 {% block body %}
 <div style="max-width: 800px; margin: 50px auto; font-family: sans-serif;">
-    <h1>Espace manager</h1>
+    <h1>Espace spécialiste chat</h1>
 
     {% if user %}
         <p>Bonjour <strong>{{ user.firstname }} {{ user.name }}</strong>.</p>
-        <p>Gérez vos locations, services et réservations depuis cet espace.</p>
+        <p>Vous avez accès aux services et réservations liés aux chats.</p>
     {% endif %}
 
     <p style="margin-top: 30px;"><a href="{{ path('app_home') }}">Retour à l'accueil</a></p>

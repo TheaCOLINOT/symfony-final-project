@@ -1,0 +1,76 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des utilisateurs{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .admin-wrapper { max-width: 1000px; margin: 40px auto; font-family: sans-serif; padding: 0 20px; }
+    .flash { padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; }
+    .flash-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .flash-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .users-table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .users-table th, .users-table td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #eee; vertical-align: middle; }
+    .users-table th { background: #2c3e50; color: white; }
+    .users-table tr:hover { background: #f8f9fa; }
+    .role-form { display: flex; align-items: center; gap: 10px; }
+    .role-form select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+    .role-form button { padding: 8px 14px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    .role-form button:hover { background: #219a52; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 0.85em; background: #ecf0f1; }
+    .badge-admin { background: #e74c3c; color: white; }
+    .badge-manager { background: #3498db; color: white; }
+    .badge-cat { background: #9b59b6; color: white; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="admin-wrapper">
+    <h1>Gestion des rôles utilisateurs</h1>
+    <p><a href="{{ path('app_admin') }}">← Retour au tableau de bord</a></p>
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="flash flash-{{ label }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    {% if users is empty %}
+        <p>Aucun utilisateur inscrit pour le moment.</p>
+    {% else %}
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Email</th>
+                    <th>Rôle actuel</th>
+                    <th>Modifier le rôle</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td><strong>{{ user.firstname }} {{ user.name }}</strong></td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            {% set role = user.userRole ?? null %}
+                            {% if role %}
+                                <span class="badge {% if role.value == 'ROLE_ADMIN' %}badge-admin{% elseif role.value == 'ROLE_MANAGER' %}badge-manager{% elseif role.value == 'ROLE_CAT' %}badge-cat{% endif %}">
+                                    {{ role.label }}
+                                </span>
+                            {% else %}
+                                <span class="badge">Utilisateur standard</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ form_start(forms[user.id], { attr: { class: 'role-form' } }) }}
+                                {{ form_widget(forms[user.id].role) }}
+                                {{ form_widget(forms[user.id].submit) }}
+                            {{ form_end(forms[user.id]) }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
+{% endblock %}

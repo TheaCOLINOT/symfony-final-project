@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\UserRole;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -55,9 +56,34 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getPhone(): ?string { return $this->phone; }
     public function setPhone(?string $phone): self { $this->phone = $phone; return $this; }
     
-    // Correspondance avec le système de rôles natif de Symfony
-    public function getRole(): ?string { return $this->role; }
-    public function setRole(?string $role): self { $this->role = $role; return $this; }
+    public function getRole(): ?string
+    {
+        return $this->role;
+    }
+
+    public function setRole(?string $role): self
+    {
+        $this->role = $role;
+
+        return $this;
+    }
+
+    public function getUserRole(): ?UserRole
+    {
+        return UserRole::fromString($this->role);
+    }
+
+    public function setUserRole(UserRole $role): self
+    {
+        $this->role = $role->value;
+
+        return $this;
+    }
+
+    public function hasRole(UserRole $role): bool
+    {
+        return $this->role === $role->value;
+    }
 
     /**
      * Identifiant unique de connexion (Symfony Requirement)
@@ -68,16 +94,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * Retourne les rôles sous forme de tableau requis par Symfony
+     * @return list<string>
      */
     public function getRoles(): array
     {
-        // On adapte votre chaîne brute en tableau exploitable par Symfony
-        $roles = $this->role ? [$this->role] : [];
-        // Garantit que chaque utilisateur a au moins le rôle de base
-        $roles[] = 'ROLE_USER'; 
+        if ($this->role === null || $this->role === UserRole::User->value) {
+            return [UserRole::User->value];
+        }
 
-        return array_unique($roles);
+        return [$this->role];
     }
 
     public function eraseCredentials(): void

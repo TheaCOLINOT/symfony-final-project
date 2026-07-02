@@ -24,5 +24,8 @@ php bin/console cache:warmup
 echo "==> Exécution des migrations..."
 php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
 
+echo "==> Création du compte administrateur par défaut..."
+php bin/console app:create-admin-user --no-interaction
+
 echo "==> Démarrage du serveur PHP sur le port 8000..."
 exec php -S 0.0.0.0:8000 -t public
