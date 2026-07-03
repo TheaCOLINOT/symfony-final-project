@@ -20,7 +20,7 @@ class CatType extends AbstractType
                 'label' => 'Couleur',
             ])
             ->add('speciality', TextType::class, [
-                'label' => 'Spécialité',
+                'label' => 'Spécialité massage',
             ]);
     }
 

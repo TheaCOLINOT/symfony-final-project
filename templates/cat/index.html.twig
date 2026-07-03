@@ -1,52 +1,92 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Espace spécialiste chat{% endblock %}
+{% block title %}Espace masseur chat{% endblock %}
 
 {% block stylesheets %}
 <style>
     .dashboard { max-width: 900px; margin: 40px auto; font-family: sans-serif; padding: 0 20px; }
     .card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); margin-bottom: 20px; }
+    .flash { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; }
+    .flash-success { background: #d4edda; color: #155724; }
+    .flash-error { background: #f8d7da; color: #721c24; }
     .muted { color: #6b7280; }
     .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; background: #ede9fe; color: #5b21b6; margin-right: 8px; margin-top: 8px; }
+    .salon-list { margin: 0; padding-left: 18px; }
+    .services-list label { display: block; margin-bottom: 8px; }
+    form > div { margin-bottom: 14px; }
+    input { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; }
+    button { background: #7c3aed; color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; margin-top: 12px; }
 </style>
 {% endblock %}
 
 {% block body %}
 <div class="dashboard">
-    <h1>Espace spécialiste chat</h1>
+    <h1>Espace masseur chat</h1>
+    <p class="muted">Vous êtes masseur dans un salon de massage — en tant que chat.</p>
 
     {% if user %}
         <p>Bonjour <strong>{{ user.firstname }} {{ user.name }}</strong>.</p>
-        <p class="muted">Consultez les chats et les services globaux gérés par les managers de salon.</p>
     {% endif %}
 
-    <div class="card">
-        <h2>Services globaux disponibles</h2>
-        {% if available_services is empty %}
-            <p class="muted">Aucun service global n'a encore été créé.</p>
-        {% else %}
-            {% for service in available_services %}
-                <div class="badge">{{ service.title }} · {{ service.price }}€ · {{ service.duration }}</div>
-            {% endfor %}
-        {% endif %}
-    </div>
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="flash flash-{{ label }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
 
-    <div class="card">
-        <h2>Chats enregistrés</h2>
-        {% if cats is empty %}
-            <p class="muted">Aucun chat n'a encore été ajouté par un manager.</p>
-        {% else %}
-            <ul>
-                {% for cat in cats %}
-                    <li>
-                        <strong>{{ cat.speciality }}</strong> — {{ cat.specie }} ({{ cat.color }})
-                        {% if cat.location %}
-                            <br><span class="muted">Salon : {{ cat.location.city }}</span>
-                        {% endif %}
-                    </li>
-                {% endfor %}
-            </ul>
+    {% if cat is null %}
+        <div class="card">
+            <h2>Créer mon profil masseur</h2>
+            <p class="muted">Complétez votre fiche pour que les managers de salon puissent vous recruter.</p>
+            {{ form_start(profile_form) }}
+                {{ form_row(profile_form.specie) }}
+                {{ form_row(profile_form.color) }}
+                {{ form_row(profile_form.speciality) }}
+                <button type="submit">Créer mon profil</button>
+            {{ form_end(profile_form) }}
+        </div>
+    {% else %}
+        <div class="card">
+            <h2>Mon profil</h2>
+            <p><strong>Spécialité :</strong> {{ cat.speciality }}</p>
+            <p><strong>Espèce :</strong> {{ cat.specie }} · <strong>Couleur :</strong> {{ cat.color }}</p>
+        </div>
+
+        <div class="card">
+            <h2>Mes salons de massage</h2>
+            {% if cat.locations is empty %}
+                <p class="muted">Vous n'êtes rattaché à aucun salon pour le moment. Un manager doit vous ajouter à son équipe avant que vous puissiez choisir vos prestations.</p>
+            {% else %}
+                <ul class="salon-list">
+                    {% for location in cat.locations %}
+                        <li><strong>{{ location.city }}</strong> — {{ location.address }}, {{ location.country }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        {% if cat.locations is not empty %}
+            <div class="card">
+                <h2>Mes prestations</h2>
+                <p class="muted">Choisissez les types de massage que vous proposez dans vos salons.</p>
+
+                {% if available_services is empty %}
+                    <p class="muted">Aucun service global n'est disponible pour le moment.</p>
+                {% else %}
+                    {{ form_start(service_form, { attr: { class: 'services-list' } }) }}
+                        {{ form_widget(service_form.services) }}
+                        <button type="submit">Enregistrer mes services</button>
+                    {{ form_end(service_form) }}
+                {% endif %}
+
+                {% if cat.services is not empty %}
+                    <p style="margin-top: 20px;"><strong>Services actuellement sélectionnés :</strong></p>
+                    {% for service in cat.services %}
+                        <span class="badge">{{ service.title }} · {{ service.price }}€ · {{ service.duration }}</span>
+                    {% endfor %}
+                {% endif %}
+            </div>
         {% endif %}
-    </div>
+    {% endif %}
 </div>
 {% endblock %}

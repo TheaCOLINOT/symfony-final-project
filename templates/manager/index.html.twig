@@ -16,9 +16,8 @@
     .muted { color: #6b7280; }
     .salon-badge { display: inline-block; background: #dbeafe; color: #1e40af; padding: 6px 12px; border-radius: 8px; margin-bottom: 16px; }
     form > div { margin-bottom: 14px; }
-    input, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db; box-sizing: border-box; }
+    input, textarea, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db; box-sizing: border-box; }
     button { background: #2563eb; color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; }
-    .services-list label { display: block; margin-bottom: 8px; }
     .cat-card { margin-bottom: 20px; }
     @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
 </style>
@@ -26,7 +25,8 @@
 
 {% block body %}
 <div class="dashboard">
-    <h1>Espace manager</h1>
+    <h1>Espace manager de salon</h1>
+    <p class="muted">Gérez votre salon de massage et votre équipe de masseurs chats.</p>
 
     {% if user %}
         <p>Bonjour <strong>{{ user.firstname }} {{ user.name }}</strong>.</p>
@@ -60,8 +60,8 @@
 
         <div class="grid">
             <section class="card">
-                <h2>Créer un service global</h2>
-                <p class="muted">Les services globaux sont disponibles pour tous les salons.</p>
+                <h2>Créer une prestation</h2>
+                <p class="muted">Catalogue des types de massage proposés dans tous les salons.</p>
                 {{ form_start(service_form) }}
                     {{ form_row(service_form.title) }}
                     {{ form_row(service_form.description) }}
@@ -71,20 +71,23 @@
                 {{ form_end(service_form) }}
             </section>
 
-            {% if not is_global_admin and cat_form %}
+            {% if not is_global_admin and add_cat_form %}
                 <section class="card">
-                    <h2>Ajouter un chat au salon</h2>
-                    {{ form_start(cat_form) }}
-                        {{ form_row(cat_form.specie) }}
-                        {{ form_row(cat_form.color) }}
-                        {{ form_row(cat_form.speciality) }}
-                        <button type="submit">Ajouter le chat</button>
-                    {{ form_end(cat_form) }}
+                    <h2>Recruter un masseur chat</h2>
+                    <p class="muted">Ajoutez un masseur chat déjà inscrit sur la plateforme. Votre salon peut en accueillir autant que nécessaire.</p>
+                    {% if available_masseurs_count > 0 %}
+                        {{ form_start(add_cat_form) }}
+                            {{ form_row(add_cat_form.masseurUser) }}
+                            <button type="submit">Ajouter au salon</button>
+                        {{ form_end(add_cat_form) }}
+                    {% else %}
+                        <p class="muted">Aucun masseur chat inscrit disponible. Les masseurs doivent s'inscrire sur la plateforme et recevoir le rôle « Chat masseur » depuis l'administration.</p>
+                    {% endif %}
                 </section>
             {% endif %}
 
             <section class="card">
-                <h2>Services globaux</h2>
+                <h2>Catalogue des prestations</h2>
                 {% if services is empty %}
                     <p class="muted">Aucun service global n'a encore été créé.</p>
                 {% else %}
@@ -101,22 +104,23 @@
         </div>
 
         {% if not is_global_admin %}
-            <h2 style="margin-top: 32px;">Chats de votre salon</h2>
+            <h2 style="margin-top: 32px;">Masseurs chats de votre salon</h2>
             {% if cats is empty %}
                 <div class="card">
-                    <p class="muted">Aucun chat n'a encore été ajouté à ce salon.</p>
+                    <p class="muted">Aucun masseur chat n'a encore rejoint votre salon.</p>
                 </div>
             {% else %}
                 {% for cat in cats %}
                     <div class="card cat-card">
                         <h3>{{ cat.speciality }}</h3>
                         <p><strong>Espèce :</strong> {{ cat.specie }} · <strong>Couleur :</strong> {{ cat.color }}</p>
-
-                        <h4>Services proposés par ce chat</h4>
-                        {{ form_start(service_forms[cat.id], { attr: { class: 'services-list' } }) }}
-                            {{ form_widget(service_forms[cat.id].services) }}
-                            <button type="submit">Mettre à jour les services</button>
-                        {{ form_end(service_forms[cat.id]) }}
+                        {% if cat.user %}
+                            <p class="muted">Compte : {{ cat.user.firstname }} {{ cat.user.name }} ({{ cat.user.email }})</p>
+                        {% endif %}
+                        {% if cat.locations|length > 1 %}
+                            <p class="muted">Présent aussi dans {{ cat.locations|length - 1 }} autre(s) salon(s).</p>
+                        {% endif %}
+                        <p class="muted">Ce masseur choisit lui-même ses prestations depuis son espace personnel.</p>
                     </div>
                 {% endfor %}
             {% endif %}

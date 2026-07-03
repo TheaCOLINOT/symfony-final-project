@@ -44,6 +44,8 @@ class LocationRepository extends ServiceEntityRepository
             ->addSelect('m')
             ->leftJoin('m.user', 'u')
             ->addSelect('u')
+            ->leftJoin('l.cats', 'c')
+            ->addSelect('c')
             ->orderBy('l.isGlobal', 'DESC')
             ->addOrderBy('l.city', 'ASC')
             ->getQuery()

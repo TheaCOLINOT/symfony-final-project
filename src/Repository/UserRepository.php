@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Location;
 use App\Entity\User;
 use App\Enum\UserRole;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -63,6 +64,42 @@ class UserRepository extends ServiceEntityRepository
             ->andWhere('m.id IS NULL OR m.location IS NULL')
             ->setParameter('role', UserRole::Manager->value)
             ->orderBy('u.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return list<User>
+     */
+    public function findCatUsersWithoutProfile(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->leftJoin('App\Entity\Cat', 'c', 'WITH', 'c.user = u')
+            ->andWhere('u.role = :role')
+            ->andWhere('c.id IS NULL')
+            ->setParameter('role', UserRole::Cat->value)
+            ->orderBy('u.name', 'ASC')
+            ->addOrderBy('u.firstname', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Comptes masseur chat inscrits, pas encore rattachés au salon donné.
+     *
+     * @return list<User>
+     */
+    public function findCatMasseursNotInLocation(Location $location): array
+    {
+        return $this->createQueryBuilder('u')
+            ->leftJoin('App\Entity\Cat', 'c', 'WITH', 'c.user = u')
+            ->leftJoin('c.locations', 'assigned', 'WITH', 'assigned = :location')
+            ->andWhere('u.role = :role')
+            ->andWhere('assigned.id IS NULL')
+            ->setParameter('role', UserRole::Cat->value)
+            ->setParameter('location', $location)
+            ->orderBy('u.name', 'ASC')
+            ->addOrderBy('u.firstname', 'ASC')
             ->getQuery()
             ->getResult();
     }

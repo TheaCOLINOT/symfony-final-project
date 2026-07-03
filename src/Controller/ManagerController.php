@@ -2,14 +2,13 @@
 
 namespace App\Controller;
 
-use App\Entity\Cat;
 use App\Entity\Service;
 use App\Entity\User;
-use App\Form\CatServiceSelectionType;
-use App\Form\CatType;
+use App\Form\CatAssignType;
 use App\Form\ServiceType;
 use App\Repository\CatRepository;
 use App\Repository\ServiceRepository;
+use App\Repository\UserRepository;
 use App\Service\ManagerContextService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,11 +22,10 @@ final class ManagerController extends AbstractController
 {
     #[Route('/manager', name: 'app_manager')]
     public function index(
-        Request $request,
-        EntityManagerInterface $entityManager,
         ManagerContextService $managerContext,
         ServiceRepository $serviceRepository,
         CatRepository $catRepository,
+        UserRepository $userRepository,
     ): Response {
         $user = $this->getUser();
         if (!$user instanceof User) {
@@ -52,23 +50,16 @@ final class ManagerController extends AbstractController
             'action' => $this->generateUrl('app_manager_service_create'),
         ]);
 
-        $cat = new Cat();
-        $catForm = $this->createForm(CatType::class, $cat, [
-            'action' => $this->generateUrl('app_manager_cat_create'),
-        ]);
-
-        $cats = $isGlobalAdmin ? [] : $catRepository->findByLocation($managedLocation);
-        $serviceForms = [];
-
-        foreach ($cats as $existingCat) {
-            $serviceForms[$existingCat->getId()] = $this->createForm(CatServiceSelectionType::class, [
-                'services' => $existingCat->getServices()->toArray(),
-            ], [
-                'action' => $this->generateUrl('app_manager_cat_services', ['id' => $existingCat->getId()]),
-                'method' => 'POST',
-                'services' => $serviceRepository->findGlobalServices(),
+        $availableMasseurs = $isGlobalAdmin ? [] : $userRepository->findCatMasseursNotInLocation($managedLocation);
+        $addCatForm = null;
+        if (!$isGlobalAdmin) {
+            $addCatForm = $this->createForm(CatAssignType::class, null, [
+                'action' => $this->generateUrl('app_manager_cat_add'),
+                'masseurs' => $availableMasseurs,
             ])->createView();
         }
+
+        $cats = $isGlobalAdmin ? [] : $catRepository->findByLocation($managedLocation);
 
         return $this->render('manager/index.html.twig', [
             'user' => $user,
@@ -76,10 +67,10 @@ final class ManagerController extends AbstractController
             'is_global_admin' => $isGlobalAdmin,
             'no_location' => false,
             'service_form' => $serviceForm->createView(),
-            'cat_form' => $isGlobalAdmin ? null : $catForm->createView(),
+            'add_cat_form' => $addCatForm,
+            'available_masseurs_count' => count($availableMasseurs),
             'services' => $serviceRepository->findGlobalServices(),
             'cats' => $cats,
-            'service_forms' => $serviceForms,
         ]);
     }
 
@@ -117,11 +108,13 @@ final class ManagerController extends AbstractController
         return $this->redirectToRoute('app_manager');
     }
 
-    #[Route('/manager/cats/create', name: 'app_manager_cat_create', methods: ['POST'])]
-    public function createCat(
+    #[Route('/manager/cats/add', name: 'app_manager_cat_add', methods: ['POST'])]
+    public function addCat(
         Request $request,
         EntityManagerInterface $entityManager,
         ManagerContextService $managerContext,
+        CatRepository $catRepository,
+        UserRepository $userRepository,
     ): Response {
         $user = $this->getUser();
         if (!$user instanceof User) {
@@ -130,74 +123,49 @@ final class ManagerController extends AbstractController
 
         $managedLocation = $managerContext->getManagedLocation($user);
         if ($managedLocation === null || $managedLocation->isGlobal()) {
-            $this->addFlash('error', 'Seuls les managers de salon peuvent créer des chats.');
-
-            return $this->redirectToRoute('app_manager');
-        }
-
-        $cat = new Cat();
-        $form = $this->createForm(CatType::class, $cat);
-        $form->handleRequest($request);
-
-        if (!$form->isSubmitted() || !$form->isValid()) {
-            $this->addFlash('error', 'Impossible de créer ce chat.');
-
-            return $this->redirectToRoute('app_manager');
-        }
-
-        $cat->setLocation($managedLocation);
-        $entityManager->persist($cat);
-        $entityManager->flush();
-
-        $this->addFlash('success', 'Le chat a bien été ajouté à votre salon.');
-
-        return $this->redirectToRoute('app_manager');
-    }
-
-    #[Route('/manager/cats/{id}/services', name: 'app_manager_cat_services', methods: ['POST'])]
-    public function updateCatServices(
-        Cat $cat,
-        Request $request,
-        EntityManagerInterface $entityManager,
-        ManagerContextService $managerContext,
-        ServiceRepository $serviceRepository,
-    ): Response {
-        $user = $this->getUser();
-        if (!$user instanceof User) {
             throw $this->createAccessDeniedException();
         }
 
-        if ($cat->getLocation() === null || !$managerContext->canManageLocation($user, $cat->getLocation())) {
-            throw $this->createAccessDeniedException();
-        }
-
-        $form = $this->createForm(CatServiceSelectionType::class, [
-            'services' => $cat->getServices()->toArray(),
-        ], [
-            'services' => $serviceRepository->findGlobalServices(),
+        $availableMasseurs = $userRepository->findCatMasseursNotInLocation($managedLocation);
+        $form = $this->createForm(CatAssignType::class, null, [
+            'masseurs' => $availableMasseurs,
         ]);
         $form->handleRequest($request);
 
         if (!$form->isSubmitted() || !$form->isValid()) {
-            $this->addFlash('error', 'Impossible de mettre à jour les services de ce chat.');
+            $this->addFlash('error', 'Impossible d\'ajouter ce masseur chat au salon.');
 
             return $this->redirectToRoute('app_manager');
         }
 
-        foreach ($cat->getServices()->toArray() as $service) {
-            $cat->removeService($service);
+        /** @var User|null $masseurUser */
+        $masseurUser = $form->get('masseurUser')->getData();
+        if (!$masseurUser instanceof User) {
+            $this->addFlash('error', 'Veuillez sélectionner un masseur chat inscrit.');
+
+            return $this->redirectToRoute('app_manager');
         }
 
-        /** @var list<Service> $selectedServices */
-        $selectedServices = $form->get('services')->getData();
+        $cat = $catRepository->findOneByUser($masseurUser);
+        if ($cat === null) {
+            $this->addFlash(
+                'error',
+                'Ce masseur doit d\'abord compléter son profil dans son espace personnel avant d\'être ajouté à un salon.'
+            );
 
-        foreach ($selectedServices as $service) {
-            $cat->addService($service);
+            return $this->redirectToRoute('app_manager');
         }
 
+        if ($cat->isInLocation($managedLocation)) {
+            $this->addFlash('error', 'Ce masseur chat est déjà présent dans votre salon.');
+
+            return $this->redirectToRoute('app_manager');
+        }
+
+        $cat->addLocation($managedLocation);
         $entityManager->flush();
 
-        $this->addFlash('success', 'Les services proposés par ce chat ont été mis à jour.');
+        $this->addFlash('success', 'Le masseur chat a bien été ajouté à votre salon.');
 
         return $this->redirectToRoute('app_manager');
     }

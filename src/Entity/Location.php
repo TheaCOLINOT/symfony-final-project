@@ -39,7 +39,7 @@ class Location
     /**
      * @var Collection<int, Cat>
      */
-    #[ORM\OneToMany(mappedBy: 'location', targetEntity: Cat::class)]
+    #[ORM\ManyToMany(targetEntity: Cat::class, mappedBy: 'locations')]
     private Collection $cats;
 
     public function __construct()
@@ -145,23 +145,12 @@ class Location
 
     public function addCat(Cat $cat): self
     {
-        if (!$this->cats->contains($cat)) {
-            $this->cats->add($cat);
-            $cat->setLocation($this);
-        }
-
-        return $this;
+        return $cat->addLocation($this);
     }
 
     public function removeCat(Cat $cat): self
     {
-        if ($this->cats->removeElement($cat)) {
-            if ($cat->getLocation() === $this) {
-                $cat->setLocation(null);
-            }
-        }
-
-        return $this;
+        return $cat->removeLocation($this);
     }
 
     public function getDisplayName(): string

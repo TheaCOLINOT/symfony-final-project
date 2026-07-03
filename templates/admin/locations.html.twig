@@ -87,6 +87,7 @@
                         <th>Ville</th>
                         <th>Adresse</th>
                         <th>Manager</th>
+                        <th>Masseurs chats</th>
                         <th>Type</th>
                     </tr>
                 </thead>
@@ -104,6 +105,15 @@
                                     {% endfor %}
                                 {% else %}
                                     <span class="muted">Non assigné</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if location.isGlobal %}
+                                    <span class="muted">—</span>
+                                {% elseif location.cats is empty %}
+                                    <span class="muted">Aucun</span>
+                                {% else %}
+                                    {{ location.cats|length }} masseur{{ location.cats|length > 1 ? 's' : '' }} chat
                                 {% endif %}
                             </td>
                             <td>
