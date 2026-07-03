@@ -58,6 +58,7 @@ final class AdminController extends AbstractController
         EntityManagerInterface $entityManager,
         LocationRepository $locationRepository,
         ManagerRepository $managerRepository,
+        UserRepository $userRepository,
     ): Response {
         $location = new Location();
         $form = $this->createForm(AdminLocationType::class, $location);
