@@ -2,20 +2,48 @@
 
 {% block title %}Accueil - Salon de Massage{% endblock %}
 
+{% block stylesheets %}
+<style>
+    .home { max-width: 720px; margin: 50px auto; font-family: sans-serif; padding: 0 20px; }
+    .card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-top: 24px; }
+    .card h2 { margin-top: 0; }
+    .muted { color: #6b7280; }
+    .btn { display: inline-block; padding: 10px 20px; background: #2ecc71; color: white; text-decoration: none; border-radius: 8px; margin-right: 10px; margin-top: 10px; }
+    .btn-secondary { background: #2563eb; }
+    .reservation-preview { border-left: 4px solid #2ecc71; background: #f9fafb; border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; }
+    .reservation-preview strong { color: #2c3e50; }
+    .see-all { display: inline-block; margin-top: 8px; color: #2563eb; text-decoration: none; }
+</style>
+{% endblock %}
+
 {% block body %}
-<div style="max-width: 600px; margin: 50px auto; font-family: sans-serif;">
+<div class="home">
     <h1>Bienvenue au Salon de Massage</h1>
 
     {% if user %}
-        <p>Connexion réussie !</p>
         <p>Bonjour <strong>{{ user.firstname }} {{ user.name }}</strong>.</p>
-        <p>Email : {{ user.email }}</p>
-        <p>Rôle : <strong>{{ user.userRole ? user.userRole.label : 'Utilisateur standard' }}</strong></p>
-
-        <hr style="margin: 20px 0;">
+        <p class="muted">Email : {{ user.email }} · Rôle : {{ user.userRole ? user.userRole.label : 'Utilisateur standard' }}</p>
 
         {% if is_granted('ROLE_USER') and not is_granted('ROLE_MANAGER') and not is_granted('ROLE_CAT') %}
-            <a href="#" style="display: inline-block; padding: 10px 20px; background: #2ecc71; color: white; text-decoration: none; border-radius: 5px;">Prendre un rendez-vous</a>
+            <p>
+                <a href="{{ path('app_search') }}" class="btn">Rechercher une prestation</a>
+                <a href="{{ path('app_user_reservations') }}" class="btn btn-secondary">Mes réservations</a>
+            </p>
+
+            <div class="card">
+                <h2>Prochaines réservations</h2>
+                {% if upcoming_reservations is empty %}
+                    <p class="muted">Vous n'avez pas encore de rendez-vous planifié.</p>
+                {% else %}
+                    {% for reservation in upcoming_reservations %}
+                        <div class="reservation-preview">
+                            <strong>{{ reservation.reservationDate|date('d/m/Y à H:i') }}</strong> — {{ reservation.serviceLabel }}<br>
+                            <span class="muted">{{ reservation.location.city }} · {{ reservation.catLabel }}</span>
+                        </div>
+                    {% endfor %}
+                    <a href="{{ path('app_user_reservations') }}" class="see-all">Voir toutes mes réservations →</a>
+                {% endif %}
+            </div>
         {% endif %}
 
         {% if is_granted('ROLE_MANAGER') %}

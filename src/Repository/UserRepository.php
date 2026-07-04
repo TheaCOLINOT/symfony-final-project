@@ -1,14 +1,13 @@
 <?php
-
 namespace App\Repository;
-
 use App\Entity\Location;
 use App\Entity\User;
 use App\Enum\UserRole;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-
 /**
+ * Repository Doctrine pour les comptes utilisateurs.
+ *
  * @extends ServiceEntityRepository<User>
  */
 class UserRepository extends ServiceEntityRepository
@@ -17,8 +16,9 @@ class UserRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, User::class);
     }
-
     /**
+     * Liste tous les utilisateurs triés par nom puis prénom.
+     *
      * @return list<User>
      */
     public function findAllOrderedByName(): array
@@ -29,8 +29,9 @@ class UserRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-
     /**
+     * Utilisateurs ayant un rôle précis (ex : ROLE_MANAGER).
+     *
      * @return list<User>
      */
     public function findByRole(string $role): array
@@ -42,7 +43,9 @@ class UserRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-
+    /**
+     * Compte le nombre d'utilisateurs pour un rôle donné (tableau de bord admin).
+     */
     public function countByRole(UserRole $role): int
     {
         return (int) $this->createQueryBuilder('u')
@@ -52,8 +55,9 @@ class UserRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
     }
-
     /**
+     * Managers sans profil manager ou sans salon assigné (disponibles pour affectation).
+     *
      * @return list<User>
      */
     public function findManagersWithoutLocation(): array
@@ -61,14 +65,16 @@ class UserRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('u')
             ->leftJoin('App\Entity\Manager', 'm', 'WITH', 'm.user = u')
             ->andWhere('u.role = :role')
+            // Pas de ligne manager OU manager sans location
             ->andWhere('m.id IS NULL OR m.location IS NULL')
             ->setParameter('role', UserRole::Manager->value)
             ->orderBy('u.name', 'ASC')
             ->getQuery()
             ->getResult();
     }
-
     /**
+     * Comptes masseur chat sans fiche Cat créée (profil incomplet).
+     *
      * @return list<User>
      */
     public function findCatUsersWithoutProfile(): array
@@ -83,7 +89,6 @@ class UserRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-
     /**
      * Comptes masseur chat inscrits, pas encore rattachés au salon donné.
      *
@@ -93,6 +98,7 @@ class UserRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('u')
             ->leftJoin('App\Entity\Cat', 'c', 'WITH', 'c.user = u')
+            // Jointure pour détecter si le chat est déjà dans ce salon
             ->leftJoin('c.locations', 'assigned', 'WITH', 'assigned = :location')
             ->andWhere('u.role = :role')
             ->andWhere('assigned.id IS NULL')

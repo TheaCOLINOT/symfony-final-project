@@ -67,6 +67,15 @@
 
         {% if cat.locations is not empty %}
             <div class="card">
+                <h2>Mon planning</h2>
+                <p class="muted">Consultez vos réservations confirmées par semaine ou par mois.</p>
+                <p>
+                    <a href="{{ path('app_cat_planning', { view: 'week' }) }}" style="margin-right: 12px;">Vue semaine</a>
+                    <a href="{{ path('app_cat_planning', { view: 'month' }) }}">Vue mois</a>
+                </p>
+            </div>
+
+            <div class="card">
                 <h2>Mes prestations</h2>
                 <p class="muted">Choisissez les types de massage que vous proposez dans vos salons.</p>
 

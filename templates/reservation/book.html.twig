@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Réserver — {{ service.title }}{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .page { max-width: 720px; margin: 40px auto; font-family: sans-serif; padding: 0 20px; }
+    .card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); margin-bottom: 20px; }
+    .muted { color: #6b7280; }
+    .price { color: #27ae60; font-weight: 700; font-size: 1.1rem; }
+    form > div { margin-bottom: 16px; }
+    input { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; }
+    button { background: #2ecc71; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="page">
+    <p><a href="{{ path('app_search') }}">← Retour à la recherche</a></p>
+    <h1>Réserver une prestation</h1>
+
+    <div class="card">
+        <h2>{{ service.title }}</h2>
+        <p class="price">{{ service.price }}€ · {{ service.duration }}</p>
+        <p>{{ service.description }}</p>
+        <p class="muted"><strong>Centre :</strong> {{ location.city }} — {{ location.address }}</p>
+        <p class="muted"><strong>Masseur chat :</strong> {{ cat.speciality }} ({{ cat.specie }})</p>
+    </div>
+
+    <div class="card">
+        <h2>Choisir un créneau</h2>
+        {{ form_start(form) }}
+            {{ form_row(form.reservationAt) }}
+            {{ form_row(form.submit) }}
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

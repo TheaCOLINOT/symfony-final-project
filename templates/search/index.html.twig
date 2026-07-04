@@ -1,0 +1,99 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Rechercher une prestation{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .search-page { max-width: 1100px; margin: 40px auto; font-family: sans-serif; padding: 0 20px; }
+    .search-card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); margin-bottom: 24px; }
+    .filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .filters .full-width { grid-column: 1 / -1; }
+    .filters label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .filters select, .filters input[type="search"] { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; }
+    .filters button { background: #2ecc71; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-size: 1rem; }
+    .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    .offer-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); border-left: 4px solid #9b59b6; }
+    .offer-card h3 { margin-top: 0; color: #2c3e50; }
+    .offer-meta { color: #6b7280; font-size: 0.95rem; margin: 8px 0; }
+    .offer-price { font-weight: 700; color: #27ae60; font-size: 1.1rem; }
+    .badge { display: inline-block; background: #ede9fe; color: #5b21b6; padding: 4px 10px; border-radius: 999px; font-size: 0.85rem; margin-top: 8px; }
+    .muted { color: #6b7280; }
+    .result-count { margin-bottom: 16px; }
+    .flash { padding: 12px 16px; border-radius: 8px; margin: 16px 20px 0; max-width: 1100px; margin-left: auto; margin-right: auto; }
+    .flash-success { background: #d4edda; color: #155724; }
+    .flash-error { background: #f8d7da; color: #721c24; }
+    @media (max-width: 768px) { .filters { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block body %}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="flash flash-{{ label }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="search-page">
+    <h1>Trouver une prestation</h1>
+    <p class="muted">Recherchez un massage par centre, par type de prestation ou via la barre de recherche.</p>
+
+    <div class="search-card">
+        {{ form_start(form, { attr: { class: 'filters' } }) }}
+            <div>
+                {{ form_label(form.location) }}
+                {{ form_widget(form.location) }}
+            </div>
+            <div>
+                {{ form_label(form.service) }}
+                {{ form_widget(form.service) }}
+            </div>
+            <div class="full-width">
+                {{ form_label(form.q) }}
+                {{ form_widget(form.q) }}
+            </div>
+            <div class="full-width">
+                {{ form_widget(form.submit) }}
+                {% if has_filters %}
+                    <a href="{{ path('app_search') }}" style="margin-left: 12px; color: #6b7280;">Réinitialiser</a>
+                {% endif %}
+            </div>
+        {{ form_end(form) }}
+    </div>
+
+    <p class="result-count">
+        <strong>{{ offers|length }}</strong> prestation{{ offers|length > 1 ? 's' : '' }} disponible{{ offers|length > 1 ? 's' : '' }}
+        {% if has_filters %} correspondant à vos critères{% endif %}
+    </p>
+
+    {% if offers is empty %}
+        <div class="search-card">
+            <p class="muted">Aucune prestation trouvée. Essayez d'élargir vos critères ou vérifiez qu'un masseur chat propose bien des soins dans un salon.</p>
+        </div>
+    {% else %}
+        <div class="results-grid">
+            {% for offer in offers %}
+                <article class="offer-card">
+                    <h3>{{ offer.service.title }}</h3>
+                    <p class="offer-price">{{ offer.service.price }}€ · {{ offer.service.duration }}</p>
+                    <p>{{ offer.service.description }}</p>
+                    <p class="offer-meta">
+                        <strong>Centre :</strong> {{ offer.location.city }} — {{ offer.location.address }}, {{ offer.location.country }}
+                    </p>
+                    <p class="offer-meta">
+                        <strong>Masseur chat :</strong> {{ offer.cat.speciality }}
+                        ({{ offer.cat.specie }}, {{ offer.cat.color }})
+                    </p>
+                    <span class="badge">Disponible à la réservation</span>
+                    <p style="margin-top: 16px;">
+                        <a href="{{ path('app_reservation_book', {
+                            serviceId: offer.service.id,
+                            locationId: offer.location.id,
+                            catId: offer.cat.id
+                        }) }}" style="display: inline-block; background: #2ecc71; color: white; padding: 10px 16px; border-radius: 8px; text-decoration: none;">Réserver</a>
+                    </p>
+                </article>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

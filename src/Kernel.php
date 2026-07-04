@@ -1,16 +1,14 @@
 <?php
-
 namespace App;
-
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
-
 class Kernel extends BaseKernel
 {
     use MicroKernelTrait;
-
     /**
-     * @return list<string> An array of allowed values for APP_ENV
+     * Environnements Symfony autorisés pour APP_ENV (prod, dev, test).
+     *
+     * @return list<string>
      */
     private function getAllowedEnvs(): array
     {

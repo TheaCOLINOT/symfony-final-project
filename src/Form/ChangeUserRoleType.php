@@ -1,14 +1,14 @@
 <?php
-
 namespace App\Form;
-
 use App\Enum\UserRole;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-
+/**
+ * Formulaire admin pour changer le rôle d'un utilisateur.
+ */
 final class ChangeUserRoleType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -17,6 +17,7 @@ final class ChangeUserRoleType extends AbstractType
             ->add('role', EnumType::class, [
                 'class' => UserRole::class,
                 'label' => 'Rôle',
+                // On exclut Admin car ce rôle n'est pas géré via ce formulaire
                 'choices' => array_filter(
                     UserRole::cases(),
                     static fn (UserRole $role) => $role !== UserRole::Admin
@@ -27,7 +28,6 @@ final class ChangeUserRoleType extends AbstractType
                 'label' => 'Enregistrer',
             ]);
     }
-
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([

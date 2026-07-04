@@ -15,12 +15,18 @@
                 <a href="{{ path('app_admin') }}" style="color: white; text-decoration: none; margin-right: 20px;">Administration</a>
             {% endif %}
 
+            {% if is_granted('ROLE_USER') and not is_granted('ROLE_MANAGER') and not is_granted('ROLE_CAT') %}
+                <a href="{{ path('app_search') }}" style="color: white; text-decoration: none; margin-right: 20px;">Prestations</a>
+                <a href="{{ path('app_user_reservations') }}" style="color: white; text-decoration: none; margin-right: 20px;">Réservations</a>
+            {% endif %}
+
             {% if is_granted('ROLE_MANAGER') %}
                 <a href="{{ path('app_manager') }}" style="color: white; text-decoration: none; margin-right: 20px;">Espace manager</a>
             {% endif %}
 
             {% if is_granted('ROLE_CAT') %}
                 <a href="{{ path('app_cat') }}" style="color: white; text-decoration: none; margin-right: 20px;">Espace masseur chat</a>
+                <a href="{{ path('app_cat_planning') }}" style="color: white; text-decoration: none; margin-right: 20px;">Planning</a>
             {% endif %}
 
             <span style="float: right;">

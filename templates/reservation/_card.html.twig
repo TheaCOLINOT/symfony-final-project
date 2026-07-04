@@ -1,0 +1,12 @@
+<article class="reservation-card">
+    <div class="reservation-date">
+        <strong>{{ reservation.reservationDate|date('d/m/Y') }}</strong>
+        <span>{{ reservation.reservationDate|date('H:i') }}</span>
+    </div>
+    <div class="reservation-details">
+        <h3>{{ reservation.serviceLabel }}</h3>
+        <p class="muted">{{ reservation.duration }} · {{ reservation.price }}€</p>
+        <p><strong>Centre :</strong> {{ reservation.location.city }} — {{ reservation.location.address }}</p>
+        <p><strong>Masseur chat :</strong> {{ reservation.catLabel }}</p>
+    </div>
+</article>
