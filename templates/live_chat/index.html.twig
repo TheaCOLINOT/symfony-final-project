@@ -1,0 +1,141 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Live chat — {{ reservation.serviceLabel }}{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .chat-page { max-width: 760px; margin: 40px auto; font-family: sans-serif; padding: 0 20px; }
+    .chat-header { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-bottom: 20px; border-left: 4px solid #9b59b6; }
+    .chat-header h1 { margin: 0 0 8px; font-size: 1.4rem; }
+    .muted { color: #6b7280; }
+    .chat-box { background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); display: flex; flex-direction: column; min-height: 420px; }
+    .chat-messages { flex: 1; padding: 20px; overflow-y: auto; max-height: 420px; }
+    .message { margin-bottom: 14px; display: flex; }
+    .message.user { justify-content: flex-end; }
+    .message.cat { justify-content: flex-start; }
+    .bubble { max-width: 80%; padding: 10px 14px; border-radius: 14px; line-height: 1.4; word-break: break-word; }
+    .message.user .bubble { background: #2ecc71; color: white; border-bottom-right-radius: 4px; }
+    .message.cat .bubble { background: #f3f4f6; color: #1f2937; border-bottom-left-radius: 4px; font-family: monospace; }
+    .message time { display: block; font-size: 0.75rem; opacity: 0.7; margin-top: 4px; }
+    .chat-form { border-top: 1px solid #eee; padding: 16px; display: flex; gap: 10px; }
+    .chat-form input[type="text"] { flex: 1; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; }
+    .chat-form button { background: #9b59b6; color: white; border: none; padding: 12px 18px; border-radius: 8px; cursor: pointer; }
+    .typing { font-style: italic; color: #6b7280; padding: 0 20px 12px; display: none; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="chat-page">
+    <p><a href="{{ path('app_user_reservations') }}">← Mes réservations</a></p>
+
+    <div class="chat-header">
+        <h1>Live chat avec {{ cat ? cat.speciality : reservation.catLabel }}</h1>
+        <p class="muted">
+            {{ reservation.serviceLabel }} · à distance
+            {% if cat %}({{ cat.specie }}, {{ cat.color }}){% endif %}
+        </p>
+        <p class="muted">Le masseur chat répond automatiquement… comme s'il posait ses pattes sur le clavier.</p>
+    </div>
+
+    <div class="chat-box">
+        <div id="chat-messages" class="chat-messages">
+            {% for message in messages %}
+                <div class="message {{ message.sender }}">
+                    <div class="bubble">
+                        {{ message.content|e }}
+                        <time>{{ message.createdAt|date('H:i') }}</time>
+                    </div>
+                </div>
+            {% else %}
+                <p class="muted" id="chat-empty">Envoyez un message pour démarrer la conversation avec le chat.</p>
+            {% endfor %}
+        </div>
+        <p class="typing" id="chat-typing">Le chat tape sur le clavier…</p>
+        <form id="chat-form" class="chat-form" action="{{ path('app_live_chat_message', { reservationId: reservation.id }) }}" method="post">
+            <input type="hidden" name="_token" value="{{ csrf_token('live_chat_message') }}">
+            <input type="text" name="content" id="chat-input" placeholder="Écrivez votre message…" autocomplete="off" required maxlength="500">
+            <button type="submit">Envoyer</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+(function () {
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('chat-input');
+    const messagesEl = document.getElementById('chat-messages');
+    const typingEl = document.getElementById('chat-typing');
+    const emptyEl = document.getElementById('chat-empty');
+
+    function appendMessage(sender, content, createdAt) {
+        if (emptyEl) {
+            emptyEl.remove();
+        }
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'message ' + sender;
+
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.textContent = content;
+
+        const time = document.createElement('time');
+        time.textContent = createdAt;
+        bubble.appendChild(time);
+
+        wrapper.appendChild(bubble);
+        messagesEl.appendChild(wrapper);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const content = input.value.trim();
+        if (content === '') {
+            return;
+        }
+
+        const formData = new FormData(form);
+        formData.set('content', content);
+        input.value = '';
+        appendMessage('user', content, new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }));
+        input.disabled = true;
+        typingEl.style.display = 'block';
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                alert(data.error || 'Impossible d\'envoyer le message.');
+                return;
+            }
+
+            const catMessage = data.messages.find(function (message) {
+                return message.sender === 'cat';
+            });
+
+            if (catMessage) {
+                await new Promise(function (resolve) {
+                    setTimeout(resolve, 600);
+                });
+                appendMessage(catMessage.sender, catMessage.content, catMessage.createdAt);
+            }
+        } catch (error) {
+            alert('Erreur réseau, réessayez.');
+        } finally {
+            typingEl.style.display = 'none';
+            input.disabled = false;
+            input.focus();
+        }
+    });
+})();
+</script>
+{% endblock %}

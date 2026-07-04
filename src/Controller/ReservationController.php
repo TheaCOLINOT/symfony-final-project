@@ -7,6 +7,7 @@ use App\Entity\Location;
 use App\Entity\Service;
 use App\Entity\User;
 use App\Form\ReservationBookType;
+use App\Repository\LocationRepository;
 use App\Service\ReservationFactoryService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
@@ -125,5 +126,77 @@ final class ReservationController extends AbstractController
         ));
 
         return $this->redirectToRoute('app_user_reservations');
+    }
+
+    // Réservation immédiate du live chat à distance (sans créneau)
+    #[Route(
+        '/reservation/live-chat/{serviceId}/{catId}',
+        name: 'app_reservation_book_remote',
+        methods: ['GET'],
+    )]
+    public function bookRemote(
+        #[MapEntity(id: 'serviceId')] Service $service,
+        #[MapEntity(id: 'catId')] Cat $cat,
+        ReservationFactoryService $reservationFactory,
+        LocationRepository $locationRepository,
+    ): Response {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $location = $locationRepository->findRemoteLocation();
+        if ($location === null) {
+            throw $this->createNotFoundException('Le live chat à distance n\'est pas disponible.');
+        }
+
+        $reservationFactory->assertRemoteOfferAvailable($service, $location, $cat);
+
+        return $this->render('reservation/book_remote.html.twig', [
+            'service' => $service,
+            'location' => $location,
+            'cat' => $cat,
+        ]);
+    }
+
+    #[Route('/reservation/live-chat/valider', name: 'app_reservation_confirm_remote', methods: ['POST'])]
+    public function confirmRemote(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        ReservationFactoryService $reservationFactory,
+        LocationRepository $locationRepository,
+    ): Response {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if (!$this->isCsrfTokenValid('reservation_confirm_remote', (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Jeton CSRF invalide.');
+        }
+
+        $serviceId = $request->request->getInt('service_id');
+        $catId = $request->request->getInt('cat_id');
+
+        $service = $entityManager->find(Service::class, $serviceId);
+        $cat = $entityManager->find(Cat::class, $catId);
+        $location = $locationRepository->findRemoteLocation();
+
+        if (!$service instanceof Service || !$cat instanceof Cat || $location === null) {
+            $this->addFlash('error', 'Cette prestation n\'est plus disponible.');
+
+            return $this->redirectToRoute('app_search');
+        }
+
+        $reservationAt = new \DateTimeImmutable('now');
+        $reservation = $reservationFactory->create($user, $service, $location, $cat, $reservationAt);
+        $entityManager->persist($reservation);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Votre live chat avec le masseur chat est prêt. Miaou !');
+
+        return $this->redirectToRoute('app_live_chat', [
+            'reservationId' => $reservation->getId(),
+        ]);
     }
 }

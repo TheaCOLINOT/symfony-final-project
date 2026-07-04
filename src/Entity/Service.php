@@ -27,6 +27,8 @@ class Service
     private ?int $price = null; // Prix en centimes ou euros selon la config
     #[ORM\Column(name: 'is_global', type: 'boolean')]
     private bool $isGlobal = true; // True si la prestation est dispo dans tous les salons
+    #[ORM\Column(name: 'is_remote_live_chat', type: 'boolean')]
+    private bool $isRemoteLiveChat = false; // Prestation spéciale : live chat à distance pour tous les chats
     /**
      * @var Collection<int, Cat>
      */
@@ -100,6 +102,17 @@ class Service
     public function setIsGlobal(bool $isGlobal): self
     {
         $this->isGlobal = $isGlobal;
+        return $this;
+    }
+    /** Indique si c'est la prestation live chat à distance (proposée par tous les chats). */
+    public function isRemoteLiveChat(): bool
+    {
+        return $this->isRemoteLiveChat;
+    }
+    /** Définit si la prestation est le live chat à distance. */
+    public function setIsRemoteLiveChat(bool $isRemoteLiveChat): self
+    {
+        $this->isRemoteLiveChat = $isRemoteLiveChat;
         return $this;
     }
     /**

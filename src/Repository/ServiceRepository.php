@@ -49,19 +49,33 @@ class ServiceRepository extends ServiceEntityRepository
      */
 
     public function findGlobalServices(): array
-
     {
-
         return $this->createQueryBuilder('s')
-
             ->andWhere('s.isGlobal = true')
-
             ->orderBy('s.title', 'ASC')
-
             ->getQuery()
-
             ->getResult();
+    }
 
+    /**
+     * Prestations que les masseurs chats peuvent cocher (hors live chat automatique).
+     *
+     * @return list<Service>
+     */
+    public function findSelectableGlobalServices(): array
+    {
+        return $this->createQueryBuilder('s')
+            ->andWhere('s.isGlobal = true')
+            ->andWhere('s.isRemoteLiveChat = false')
+            ->orderBy('s.title', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /** Prestation spéciale live chat à distance. */
+    public function findRemoteLiveChatService(): ?Service
+    {
+        return $this->findOneBy(['isRemoteLiveChat' => true]);
     }
 
 

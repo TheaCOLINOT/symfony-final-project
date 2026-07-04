@@ -72,24 +72,40 @@
     {% else %}
         <div class="results-grid">
             {% for offer in offers %}
-                <article class="offer-card">
+                <article class="offer-card"{% if offer.service.isRemoteLiveChat %} style="border-left-color: #9b59b6;"{% endif %}>
                     <h3>{{ offer.service.title }}</h3>
                     <p class="offer-price">{{ offer.service.price }}€ · {{ offer.service.duration }}</p>
                     <p>{{ offer.service.description }}</p>
                     <p class="offer-meta">
-                        <strong>Centre :</strong> {{ offer.location.city }} — {{ offer.location.address }}, {{ offer.location.country }}
+                        <strong>Centre :</strong>
+                        {% if offer.location.isRemote %}
+                            {{ offer.location.city }} — {{ offer.location.address }}
+                        {% else %}
+                            {{ offer.location.city }} — {{ offer.location.address }}, {{ offer.location.country }}
+                        {% endif %}
                     </p>
                     <p class="offer-meta">
                         <strong>Masseur chat :</strong> {{ offer.cat.speciality }}
                         ({{ offer.cat.specie }}, {{ offer.cat.color }})
                     </p>
-                    <span class="badge">Disponible à la réservation</span>
+                    {% if offer.service.isRemoteLiveChat %}
+                        <span class="badge">À distance · Live chat</span>
+                    {% else %}
+                        <span class="badge">Disponible à la réservation</span>
+                    {% endif %}
                     <p style="margin-top: 16px;">
-                        <a href="{{ path('app_reservation_book', {
-                            serviceId: offer.service.id,
-                            locationId: offer.location.id,
-                            catId: offer.cat.id
-                        }) }}" style="display: inline-block; background: #2ecc71; color: white; padding: 10px 16px; border-radius: 8px; text-decoration: none;">Réserver</a>
+                        {% if offer.service.isRemoteLiveChat %}
+                            <a href="{{ path('app_reservation_book_remote', {
+                                serviceId: offer.service.id,
+                                catId: offer.cat.id
+                            }) }}" style="display: inline-block; background: #9b59b6; color: white; padding: 10px 16px; border-radius: 8px; text-decoration: none;">Démarrer le live chat</a>
+                        {% else %}
+                            <a href="{{ path('app_reservation_book', {
+                                serviceId: offer.service.id,
+                                locationId: offer.location.id,
+                                catId: offer.cat.id
+                            }) }}" style="display: inline-block; background: #2ecc71; color: white; padding: 10px 16px; border-radius: 8px; text-decoration: none;">Réserver</a>
+                        {% endif %}
                     </p>
                 </article>
             {% endfor %}

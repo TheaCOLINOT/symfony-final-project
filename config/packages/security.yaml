@@ -39,6 +39,7 @@ security:
         - { path: ^/recherche, roles: ROLE_USER }
         - { path: ^/reservation, roles: ROLE_USER }
         - { path: ^/mes-reservations, roles: ROLE_USER }
+        - { path: ^/live-chat, roles: ROLE_USER }
         - { path: ^/admin, roles: ROLE_MANAGER }
         - { path: ^/manager, roles: ROLE_MANAGER }
         - { path: ^/espace-cat, roles: ROLE_CAT }

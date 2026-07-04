@@ -111,25 +111,28 @@ class CatRepository extends ServiceEntityRepository
      */
 
     public function findAllOrderedBySpeciality(): array
-
     {
-
         return $this->createQueryBuilder('c')
-
-            // On pré-charge les salons pour l'affichage admin
-
             ->leftJoin('c.locations', 'l')
-
             ->addSelect('l')
-
             ->orderBy('c.speciality', 'ASC')
-
             ->addOrderBy('c.specie', 'ASC')
-
             ->getQuery()
-
             ->getResult();
+    }
 
+    /**
+     * Tous les masseurs chats, y compris sans salon (pour le live chat à distance).
+     *
+     * @return list<Cat>
+     */
+    public function findAllForRemoteLiveChat(): array
+    {
+        return $this->createQueryBuilder('c')
+            ->orderBy('c.speciality', 'ASC')
+            ->addOrderBy('c.specie', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 
 }

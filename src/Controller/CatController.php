@@ -44,14 +44,14 @@ final class CatController extends AbstractController
             ], [
                 'action' => $this->generateUrl('app_cat_services'),
                 'method' => 'POST',
-                'services' => $serviceRepository->findGlobalServices(),
+                'services' => $serviceRepository->findSelectableGlobalServices(),
             ])->createView();
         }
         return $this->render('cat/index.html.twig', [
             'user' => $user,
             'cat' => $cat,
             'profile_form' => $profileForm,
-            'available_services' => $serviceRepository->findGlobalServices(),
+            'available_services' => $serviceRepository->findSelectableGlobalServices(),
             'service_form' => $serviceForm,
         ]);
     }
@@ -105,7 +105,7 @@ final class CatController extends AbstractController
         $form = $this->createForm(CatServiceSelectionType::class, [
             'services' => $cat->getServices()->toArray(),
         ], [
-            'services' => $serviceRepository->findGlobalServices(),
+            'services' => $serviceRepository->findSelectableGlobalServices(),
         ]);
         $form->handleRequest($request);
         if (!$form->isSubmitted() || !$form->isValid()) {

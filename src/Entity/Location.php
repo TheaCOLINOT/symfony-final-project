@@ -14,6 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Location
 {
     public const GLOBAL_CITY = 'Global'; // Nom de ville pour la localisation globale (tous salons)
+    public const REMOTE_CITY = 'À distance'; // Libellé pour les prestations en ligne
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -26,6 +27,8 @@ class Location
     private ?string $city = null; // Ville du salon
     #[ORM\Column(name: 'is_global', type: 'boolean')]
     private bool $isGlobal = false; // True si c'est la localisation globale (pas un salon physique)
+    #[ORM\Column(name: 'is_remote', type: 'boolean')]
+    private bool $isRemote = false; // True si c'est le lieu virtuel pour les prestations à distance
     /**
      * @var Collection<int, Manager>
      */
@@ -130,6 +133,17 @@ class Location
     public function setIsGlobal(bool $isGlobal): self
     {
         $this->isGlobal = $isGlobal;
+        return $this;
+    }
+    /** Indique si c'est le lieu virtuel des prestations à distance. */
+    public function isRemote(): bool
+    {
+        return $this->isRemote;
+    }
+    /** Définit si la localisation est virtuelle (à distance). */
+    public function setIsRemote(bool $isRemote): self
+    {
+        $this->isRemote = $isRemote;
         return $this;
     }
     /**

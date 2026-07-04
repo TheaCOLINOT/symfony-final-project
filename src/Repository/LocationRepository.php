@@ -30,10 +30,17 @@ class LocationRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('l')
             ->andWhere('l.isGlobal = false')
+            ->andWhere('l.isRemote = false')
             ->orderBy('l.city', 'ASC')
             ->addOrderBy('l.address', 'ASC')
             ->getQuery()
             ->getResult();
+    }
+
+    /** Lieu virtuel pour les prestations à distance. */
+    public function findRemoteLocation(): ?Location
+    {
+        return $this->findOneBy(['isRemote' => true]);
     }
     /**
      * Liste tous les salons avec leurs managers, utilisateurs et chats (pour l'admin).
