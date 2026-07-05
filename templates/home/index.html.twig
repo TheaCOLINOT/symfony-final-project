@@ -2,20 +2,6 @@
 
 {% block title %}Accueil - Salon de Massage{% endblock %}
 
-{% block stylesheets %}
-<style>
-    .home { max-width: 720px; margin: 50px auto; font-family: sans-serif; padding: 0 20px; }
-    .card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-top: 24px; }
-    .card h2 { margin-top: 0; }
-    .muted { color: #6b7280; }
-    .btn { display: inline-block; padding: 10px 20px; background: #2ecc71; color: white; text-decoration: none; border-radius: 8px; margin-right: 10px; margin-top: 10px; }
-    .btn-secondary { background: #2563eb; }
-    .reservation-preview { border-left: 4px solid #2ecc71; background: #f9fafb; border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; }
-    .reservation-preview strong { color: #2c3e50; }
-    .see-all { display: inline-block; margin-top: 8px; color: #2563eb; text-decoration: none; }
-</style>
-{% endblock %}
-
 {% block body %}
 <div class="home">
     <h1>Bienvenue au Salon de Massage</h1>
@@ -26,7 +12,7 @@
 
         {% if is_granted('ROLE_USER') and not is_granted('ROLE_MANAGER') and not is_granted('ROLE_CAT') %}
             <p>
-                <a href="{{ path('app_search') }}" class="btn">Rechercher une prestation</a>
+                <a href="{{ path('app_search') }}" class="btn btn-primary">Rechercher une prestation</a>
                 <a href="{{ path('app_user_reservations') }}" class="btn btn-secondary">Mes réservations</a>
             </p>
 
@@ -47,19 +33,24 @@
         {% endif %}
 
         {% if is_granted('ROLE_MANAGER') %}
-            <p><a href="{{ path('app_manager') }}">Accéder à l'espace manager</a></p>
+            <p><a href="{{ path('app_manager') }}" class="btn btn-secondary">Accéder à l'espace manager</a></p>
         {% endif %}
 
         {% if is_granted('GLOBAL_ADMIN') %}
-            <p><a href="{{ path('app_admin') }}">Accéder à l'administration</a></p>
+            <p><a href="{{ path('app_admin') }}" class="btn btn-secondary">Accéder à l'administration</a></p>
         {% endif %}
 
         {% if is_granted('ROLE_CAT') %}
-            <p><a href="{{ path('app_cat') }}">Accéder à l'espace masseur chat</a></p>
+            <p><a href="{{ path('app_cat') }}" class="btn btn-purple">Accéder à l'espace masseur chat</a></p>
         {% endif %}
     {% else %}
-        <p>Vous n'êtes pas connecté.</p>
-        <a href="{{ path('app_login') }}">Se connecter</a> ou <a href="{{ path('app_register') }}">Créer un compte</a>
+        <div class="card">
+            <p>Vous n'êtes pas connecté.</p>
+            <p>
+                <a href="{{ path('app_login') }}" class="btn btn-primary">Se connecter</a>
+                <a href="{{ path('app_register') }}" class="btn btn-secondary">Créer un compte</a>
+            </p>
+        </div>
     {% endif %}
 </div>
 {% endblock %}

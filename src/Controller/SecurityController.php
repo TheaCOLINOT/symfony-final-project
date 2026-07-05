@@ -2,8 +2,10 @@
 namespace App\Controller;
 use App\Entity\User;
 use App\Enum\UserRole;
+use App\Event\UserRegisteredEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -27,8 +29,12 @@ class SecurityController extends AbstractController
     }
     // Inscription d'un nouvel utilisateur (rôle client par défaut)
     #[Route('/register', name: 'app_register', methods: ['GET', 'POST'])]
-    public function register(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager): Response
-    {
+    public function register(
+        Request $request,
+        UserPasswordHasherInterface $passwordHasher,
+        EntityManagerInterface $entityManager,
+        EventDispatcherInterface $eventDispatcher,
+    ): Response {
         if ($request->isMethod('POST')) {
             $user = new User();
             $user->setEmail($request->request->get('email'));
@@ -45,6 +51,9 @@ class SecurityController extends AbstractController
             // Persistance en base de données
             $entityManager->persist($user);
             $entityManager->flush();
+
+            $eventDispatcher->dispatch(new UserRegisteredEvent($user));
+
             return $this->redirectToRoute('app_login');
         }
         return $this->render('security/register.html.twig');

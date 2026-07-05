@@ -2,23 +2,6 @@
 
 {% block title %}Espace masseur chat{% endblock %}
 
-{% block stylesheets %}
-<style>
-    .dashboard { max-width: 900px; margin: 40px auto; font-family: sans-serif; padding: 0 20px; }
-    .card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); margin-bottom: 20px; }
-    .flash { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; }
-    .flash-success { background: #d4edda; color: #155724; }
-    .flash-error { background: #f8d7da; color: #721c24; }
-    .muted { color: #6b7280; }
-    .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; background: #ede9fe; color: #5b21b6; margin-right: 8px; margin-top: 8px; }
-    .salon-list { margin: 0; padding-left: 18px; }
-    .services-list label { display: block; margin-bottom: 8px; }
-    form > div { margin-bottom: 14px; }
-    input { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; }
-    button { background: #7c3aed; color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; margin-top: 12px; }
-</style>
-{% endblock %}
-
 {% block body %}
 <div class="dashboard">
     <h1>Espace masseur chat</h1>
@@ -28,12 +11,6 @@
         <p>Bonjour <strong>{{ user.firstname }} {{ user.name }}</strong>.</p>
     {% endif %}
 
-    {% for label, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="flash flash-{{ label }}">{{ message }}</div>
-        {% endfor %}
-    {% endfor %}
-
     {% if cat is null %}
         <div class="card">
             <h2>Créer mon profil masseur</h2>
@@ -42,7 +19,7 @@
                 {{ form_row(profile_form.specie) }}
                 {{ form_row(profile_form.color) }}
                 {{ form_row(profile_form.speciality) }}
-                <button type="submit">Créer mon profil</button>
+                <button type="submit" class="btn-purple">Créer mon profil</button>
             {{ form_end(profile_form) }}
         </div>
     {% else %}
@@ -70,8 +47,8 @@
                 <h2>Mon planning</h2>
                 <p class="muted">Consultez vos réservations confirmées par semaine ou par mois.</p>
                 <p>
-                    <a href="{{ path('app_cat_planning', { view: 'week' }) }}" style="margin-right: 12px;">Vue semaine</a>
-                    <a href="{{ path('app_cat_planning', { view: 'month' }) }}">Vue mois</a>
+                    <a href="{{ path('app_cat_planning', { view: 'week' }) }}" class="btn btn-purple" style="margin-right: 0.5rem;">Vue semaine</a>
+                    <a href="{{ path('app_cat_planning', { view: 'month' }) }}" class="btn btn-secondary">Vue mois</a>
                 </p>
             </div>
 
@@ -84,12 +61,12 @@
                 {% else %}
                     {{ form_start(service_form, { attr: { class: 'services-list' } }) }}
                         {{ form_widget(service_form.services) }}
-                        <button type="submit">Enregistrer mes services</button>
+                        <button type="submit" class="btn-purple">Enregistrer mes services</button>
                     {{ form_end(service_form) }}
                 {% endif %}
 
                 {% if cat.services is not empty %}
-                    <p style="margin-top: 20px;"><strong>Services actuellement sélectionnés :</strong></p>
+                    <p style="margin-top: 1.25rem;"><strong>Services actuellement sélectionnés :</strong></p>
                     {% for service in cat.services %}
                         <span class="badge">{{ service.title }} · {{ service.price }}€ · {{ service.duration }}</span>
                     {% endfor %}

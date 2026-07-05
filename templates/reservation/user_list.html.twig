@@ -2,30 +2,13 @@
 
 {% block title %}Mes réservations{% endblock %}
 
-{% block stylesheets %}
-<style>
-    .page { max-width: 900px; margin: 40px auto; font-family: sans-serif; padding: 0 20px; }
-    .section { margin-bottom: 32px; }
-    .section h2 { margin-bottom: 16px; }
-    .reservation-card { display: flex; gap: 20px; background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-bottom: 16px; border-left: 4px solid #2ecc71; }
-    .section.past .reservation-card { border-left-color: #9ca3af; opacity: 0.92; }
-    .reservation-date { min-width: 90px; text-align: center; background: #f3f4f6; border-radius: 10px; padding: 12px 10px; }
-    .reservation-date span { display: block; margin-top: 6px; color: #5b21b6; font-weight: 700; }
-    .reservation-details h3 { margin: 0 0 8px; }
-    .muted { color: #6b7280; }
-    .empty { background: #fff; border-radius: 12px; padding: 24px; color: #6b7280; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    .actions { margin-bottom: 24px; }
-    .btn { display: inline-block; background: #2ecc71; color: white; padding: 10px 16px; border-radius: 8px; text-decoration: none; }
-</style>
-{% endblock %}
-
 {% block body %}
 <div class="page">
     <h1>Mes réservations</h1>
     <p class="muted">Consultez vos rendez-vous à venir et votre historique.</p>
 
     <div class="actions">
-        <a href="{{ path('app_search') }}" class="btn">Réserver une prestation</a>
+        <a href="{{ path('app_search') }}" class="btn btn-primary">Réserver une prestation</a>
     </div>
 
     <section class="section">

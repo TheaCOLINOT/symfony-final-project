@@ -36,6 +36,8 @@ services:
       DATABASE_URL: postgresql://app:my-super-secret-password@database:5432/app?serverVersion=16&charset=utf8
       MESSENGER_TRANSPORT_DSN: doctrine://default
       MAILER_DSN: smtp://mailer:1025
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY:-}
+      OPENWEATHER_DEFAULT_CITY: ${OPENWEATHER_DEFAULT_CITY:-Paris,FR}
     depends_on:
       database:
         condition: service_healthy
@@ -57,6 +59,8 @@ services:
       DATABASE_URL: postgresql://app:my-super-secret-password@database:5432/app?serverVersion=16&charset=utf8
       MESSENGER_TRANSPORT_DSN: doctrine://default
       MAILER_DSN: smtp://mailer:1025
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY:-}
+      OPENWEATHER_DEFAULT_CITY: ${OPENWEATHER_DEFAULT_CITY:-Paris,FR}
     depends_on:
       database:
         condition: service_healthy

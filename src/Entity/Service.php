@@ -1,9 +1,11 @@
 <?php
 namespace App\Entity;
 use App\Repository\ServiceRepository;
+use App\Serializer\SerializationGroups;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 /**
  * Entité Service : représente une prestation de massage proposée dans les salons.
  * Une prestation a un titre, une description, une durée, un prix,
@@ -16,18 +18,25 @@ class Service
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups([SerializationGroups::API_READ, SerializationGroups::API_READ_DETAIL])]
     private ?int $id = null; // Identifiant unique en base
     #[ORM\Column(type: 'text')]
+    #[Groups([SerializationGroups::API_READ, SerializationGroups::API_READ_DETAIL])]
     private ?string $title = null; // Nom de la prestation (ex : Massage relaxant)
     #[ORM\Column(type: 'text')]
+    #[Groups([SerializationGroups::API_READ_DETAIL])]
     private ?string $description = null; // Description détaillée de la prestation
     #[ORM\Column(length: 255)]
+    #[Groups([SerializationGroups::API_READ, SerializationGroups::API_READ_DETAIL])]
     private ?string $duration = null; // Durée du massage (ex : "60 min")
     #[ORM\Column(type: 'integer')]
+    #[Groups([SerializationGroups::API_READ, SerializationGroups::API_READ_DETAIL])]
     private ?int $price = null; // Prix en centimes ou euros selon la config
     #[ORM\Column(name: 'is_global', type: 'boolean')]
+    #[Groups([SerializationGroups::API_READ_DETAIL])]
     private bool $isGlobal = true; // True si la prestation est dispo dans tous les salons
     #[ORM\Column(name: 'is_remote_live_chat', type: 'boolean')]
+    #[Groups([SerializationGroups::API_READ, SerializationGroups::API_READ_DETAIL])]
     private bool $isRemoteLiveChat = false; // Prestation spéciale : live chat à distance (tous les chats)
     /**
      * @var Collection<int, Cat>

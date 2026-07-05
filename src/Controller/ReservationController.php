@@ -6,12 +6,14 @@ use App\Entity\Cat;
 use App\Entity\Location;
 use App\Entity\Service;
 use App\Entity\User;
+use App\Event\ReservationConfirmedEvent;
 use App\Form\ReservationBookType;
 use App\Repository\LocationRepository;
 use App\Service\ReservationFactoryService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -72,6 +74,7 @@ final class ReservationController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         ReservationFactoryService $reservationFactory,
+        EventDispatcherInterface $eventDispatcher,
     ): Response {
         $user = $this->getUser();
         if (!$user instanceof User) {
@@ -118,6 +121,8 @@ final class ReservationController extends AbstractController
         $reservation = $reservationFactory->create($user, $service, $location, $cat, $reservationAt);
         $entityManager->persist($reservation);
         $entityManager->flush();
+
+        $eventDispatcher->dispatch(new ReservationConfirmedEvent($reservation));
 
         $this->addFlash('success', sprintf(
             'Votre réservation est confirmée pour le %s à %s.',
@@ -167,6 +172,7 @@ final class ReservationController extends AbstractController
         EntityManagerInterface $entityManager,
         ReservationFactoryService $reservationFactory,
         LocationRepository $locationRepository,
+        EventDispatcherInterface $eventDispatcher,
     ): Response {
         $user = $this->getUser();
         if (!$user instanceof User) {
@@ -196,6 +202,8 @@ final class ReservationController extends AbstractController
         $reservation = $reservationFactory->create($user, $service, $location, $cat, $reservationAt);
         $entityManager->persist($reservation);
         $entityManager->flush();
+
+        $eventDispatcher->dispatch(new ReservationConfirmedEvent($reservation));
 
         $this->addFlash('success', 'Votre live chat avec le masseur chat est prêt. Miaou !');
 

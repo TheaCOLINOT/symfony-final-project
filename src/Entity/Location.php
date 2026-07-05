@@ -1,9 +1,11 @@
 <?php
 namespace App\Entity;
 use App\Repository\LocationRepository;
+use App\Serializer\SerializationGroups;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 /**
  * Entité Location : représente un salon de massage (ou une localisation globale).
  * Un salon a une adresse, une ville, un pays, et accueille des chats masseurs
@@ -18,16 +20,21 @@ class Location
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups([SerializationGroups::API_READ])]
     private ?int $id = null; // Identifiant unique en base
     #[ORM\Column(type: 'text')]
+    #[Groups([SerializationGroups::API_READ])]
     private ?string $address = null; // Adresse postale du salon
     #[ORM\Column(type: 'text')]
+    #[Groups([SerializationGroups::API_READ])]
     private ?string $country = null; // Pays du salon
     #[ORM\Column(type: 'text')]
+    #[Groups([SerializationGroups::API_READ])]
     private ?string $city = null; // Ville du salon
     #[ORM\Column(name: 'is_global', type: 'boolean')]
     private bool $isGlobal = false; // True si c'est la localisation globale (pas un salon physique)
     #[ORM\Column(name: 'is_remote', type: 'boolean')]
+    #[Groups([SerializationGroups::API_READ])]
     private bool $isRemote = false; // True pour le lieu virtuel "À distance" (live chat)
     /**
      * @var Collection<int, Manager>

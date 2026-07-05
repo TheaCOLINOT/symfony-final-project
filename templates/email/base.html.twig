@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Salon de Massage{% endblock %}</title>
+</head>
+<body style="font-family: sans-serif; color: #2c3e50; line-height: 1.5; max-width: 600px; margin: 0 auto; padding: 24px;">
+    <header style="border-bottom: 3px solid #2c3e50; padding-bottom: 12px; margin-bottom: 24px;">
+        <strong style="font-size: 1.2rem;">Salon de Massage</strong>
+    </header>
+
+    {% block content %}{% endblock %}
+
+    <footer style="margin-top: 32px; padding-top: 12px; border-top: 1px solid #ddd; font-size: 0.85rem; color: #7f8c8d;">
+        Cet e-mail a été envoyé automatiquement, merci de ne pas y répondre.
+    </footer>
+</body>
+</html>

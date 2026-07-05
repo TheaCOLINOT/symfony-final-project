@@ -1,0 +1,21 @@
+{% extends 'email/base.html.twig' %}
+
+{% block title %}Confirmation d'inscription{% endblock %}
+
+{% block content %}
+    <h1 style="color: #2c3e50;">Bienvenue {{ user.firstname }} !</h1>
+
+    <p>Votre compte a bien été créé sur <strong>Salon de Massage</strong>.</p>
+
+    <p>
+        Identifiant de connexion : <strong>{{ user.email }}</strong>
+    </p>
+
+    <p>Vous pouvez dès maintenant rechercher une prestation et réserver votre prochain massage.</p>
+
+    <p style="margin-top: 24px;">
+        <a href="{{ url('app_login') }}" style="background: #2c3e50; color: #fff; padding: 10px 16px; text-decoration: none; border-radius: 4px;">
+            Se connecter
+        </a>
+    </p>
+{% endblock %}

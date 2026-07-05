@@ -1,45 +1,69 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{% block title %}Salon de Massage{% endblock %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>💆</text></svg>">
+        <link rel="stylesheet" href="{{ asset('css/app.css') }}">
         {% block stylesheets %}{% endblock %}
     </head>
     <body>
-        <nav style="padding: 15px 30px; background: #2c3e50; font-family: sans-serif;">
-            <a href="{{ path('app_home') }}" style="color: white; text-decoration: none; margin-right: 20px;">Accueil</a>
+        <nav class="site-nav">
+            <a href="{{ path('app_home') }}" class="site-nav__brand">Salon de Massage</a>
 
-            {% if is_granted('GLOBAL_ADMIN') %}
-                <a href="{{ path('app_admin') }}" style="color: white; text-decoration: none; margin-right: 20px;">Administration</a>
-            {% endif %}
+            <div class="site-nav__links">
+                <a href="{{ path('app_home') }}" class="site-nav__link">Accueil</a>
 
-            {% if is_granted('ROLE_USER') and not is_granted('ROLE_MANAGER') and not is_granted('ROLE_CAT') %}
-                <a href="{{ path('app_search') }}" style="color: white; text-decoration: none; margin-right: 20px;">Prestations</a>
-                <a href="{{ path('app_user_reservations') }}" style="color: white; text-decoration: none; margin-right: 20px;">Réservations</a>
-            {% endif %}
-
-            {% if is_granted('ROLE_MANAGER') %}
-                <a href="{{ path('app_manager') }}" style="color: white; text-decoration: none; margin-right: 20px;">Espace manager</a>
-            {% endif %}
-
-            {% if is_granted('ROLE_CAT') %}
-                <a href="{{ path('app_cat') }}" style="color: white; text-decoration: none; margin-right: 20px;">Espace masseur chat</a>
-                <a href="{{ path('app_cat_planning') }}" style="color: white; text-decoration: none; margin-right: 20px;">Planning</a>
-            {% endif %}
-
-            <span style="float: right;">
-                {% if app.user %}
-                    <span style="color: #ecf0f1; margin-right: 15px;">{{ app.user.firstname }} {{ app.user.name }}</span>
-                    <a href="{{ path('app_logout') }}" style="color: #e74c3c; text-decoration: none;">Déconnexion</a>
-                {% else %}
-                    <a href="{{ path('app_login') }}" style="color: white; text-decoration: none; margin-right: 15px;">Connexion</a>
-                    <a href="{{ path('app_register') }}" style="color: white; text-decoration: none;">Inscription</a>
+                {% if is_granted('GLOBAL_ADMIN') %}
+                    <a href="{{ path('app_admin') }}" class="site-nav__link">Administration</a>
                 {% endif %}
-            </span>
+
+                {% if is_granted('ROLE_USER') and not is_granted('ROLE_MANAGER') and not is_granted('ROLE_CAT') %}
+                    <a href="{{ path('app_search') }}" class="site-nav__link">Prestations</a>
+                    <a href="{{ path('app_user_reservations') }}" class="site-nav__link">Réservations</a>
+                {% endif %}
+
+                {% if is_granted('ROLE_MANAGER') %}
+                    <a href="{{ path('app_manager') }}" class="site-nav__link">Espace manager</a>
+                {% endif %}
+
+                {% if is_granted('ROLE_CAT') %}
+                    <a href="{{ path('app_cat') }}" class="site-nav__link">Espace masseur chat</a>
+                    <a href="{{ path('app_cat_planning') }}" class="site-nav__link">Planning</a>
+                {% endif %}
+            </div>
+
+            <div class="site-nav__user">
+                {% if app.user %}
+                    <span class="site-nav__username">{{ app.user.firstname }} {{ app.user.name }}</span>
+                    <a href="{{ path('app_logout') }}" class="site-nav__logout">Déconnexion</a>
+                {% else %}
+                    <a href="{{ path('app_login') }}" class="site-nav__link">Connexion</a>
+                    <a href="{{ path('app_register') }}" class="site-nav__link">Inscription</a>
+                {% endif %}
+            </div>
         </nav>
 
-        {% block body %}{% endblock %}
+        {% for label, messages in app.flashes %}
+            <div class="flash-container">
+                {% for message in messages %}
+                    <div class="flash flash-{{ label }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <main class="site-main">
+            {% block body %}{% endblock %}
+        </main>
+
+        <footer class="site-footer">
+            Salon de Massage — Prenez soin de vous
+        </footer>
+
+        {% include '_partials/weather_chatbot.html.twig' %}
+        <script src="{{ asset('js/weather-chatbot.js') }}" defer></script>
+
         {% block javascripts %}{% endblock %}
     </body>
 </html>

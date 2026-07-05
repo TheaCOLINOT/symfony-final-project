@@ -1,0 +1,34 @@
+<div
+    id="weather-chatbot"
+    class="weather-chatbot"
+    data-weather-url="{{ path('api_v1_weather') }}"
+    data-login-url="{{ path('app_login') }}"
+    data-is-authenticated="{{ app.user ? '1' : '0' }}"
+    aria-live="polite"
+>
+    <div class="weather-chatbot__panel" id="weather-chatbot-panel" hidden>
+        <div class="weather-chatbot__kitten" aria-hidden="true">
+            <span class="weather-chatbot__kitten-emoji" id="weather-kitten-emoji">🐱</span>
+        </div>
+        <div class="weather-chatbot__bubble">
+            <p class="weather-chatbot__greeting">Coucou, c'est Mimi !</p>
+            <div class="weather-chatbot__weather" id="weather-chatbot-weather">
+                <span class="weather-chatbot__loading">Je regarde le ciel…</span>
+            </div>
+            <p class="weather-chatbot__message" id="weather-chatbot-message"></p>
+            <a href="#" class="weather-chatbot__action btn btn-primary" id="weather-chatbot-action" hidden></a>
+        </div>
+    </div>
+
+    <button
+        type="button"
+        class="weather-chatbot__trigger"
+        id="weather-chatbot-trigger"
+        aria-label="Assistant météo chaton"
+        aria-expanded="false"
+        aria-controls="weather-chatbot-panel"
+    >
+        <span class="weather-chatbot__trigger-icon">🐾</span>
+        <span class="weather-chatbot__trigger-label">Météo</span>
+    </button>
+</div>

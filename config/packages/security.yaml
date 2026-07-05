@@ -36,6 +36,8 @@ security:
     access_control:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
+        - { path: ^/api/v1/weather, roles: PUBLIC_ACCESS }
+        - { path: ^/api/v1, roles: ROLE_USER }
         - { path: ^/recherche, roles: ROLE_USER }
         - { path: ^/reservation, roles: ROLE_USER }
         - { path: ^/mes-reservations, roles: ROLE_USER }

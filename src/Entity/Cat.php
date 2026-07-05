@@ -1,9 +1,11 @@
 <?php
 namespace App\Entity;
 use App\Repository\CatRepository;
+use App\Serializer\SerializationGroups;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 /**
  * Entité Cat : représente un chat masseur du réseau de salons.
  * Chaque chat a une espèce, une couleur, une spécialité, et peut travailler
@@ -16,12 +18,16 @@ class Cat
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups([SerializationGroups::API_READ])]
     private ?int $id = null; // Identifiant unique en base
     #[ORM\Column(type: 'text')]
+    #[Groups([SerializationGroups::API_READ])]
     private ?string $specie = null; // Espèce du chat (ex : Siamois, Maine Coon)
     #[ORM\Column(type: 'text')]
+    #[Groups([SerializationGroups::API_READ])]
     private ?string $color = null; // Couleur du pelage
     #[ORM\Column(type: 'text')]
+    #[Groups([SerializationGroups::API_READ])]
     private ?string $speciality = null; // Spécialité de massage (ex : relaxant, sportif)
     #[ORM\OneToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: true, unique: true)]

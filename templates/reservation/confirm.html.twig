@@ -2,19 +2,6 @@
 
 {% block title %}Confirmer la réservation{% endblock %}
 
-{% block stylesheets %}
-<style>
-    .page { max-width: 720px; margin: 40px auto; font-family: sans-serif; padding: 0 20px; }
-    .card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); margin-bottom: 20px; }
-    .muted { color: #6b7280; }
-    .summary-row { padding: 10px 0; border-bottom: 1px solid #eee; }
-    .summary-row:last-child { border-bottom: none; }
-    .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
-    .btn-confirm { background: #2ecc71; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; }
-    .btn-back { background: #6b7280; color: white; padding: 12px 20px; border-radius: 8px; text-decoration: none; display: inline-block; }
-</style>
-{% endblock %}
-
 {% block body %}
 <div class="page">
     <h1>Valider votre réservation</h1>
@@ -29,7 +16,7 @@
         <div class="summary-row"><strong>Heure :</strong> {{ reservationAt|date('H:i') }}</div>
     </div>
 
-    <div class="actions">
+    <div class="summary-actions">
         <form method="post" action="{{ path('app_reservation_confirm') }}">
             <input type="hidden" name="_token" value="{{ csrf_token('reservation_confirm') }}">
             <input type="hidden" name="service_id" value="{{ service.id }}">

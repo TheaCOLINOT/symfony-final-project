@@ -16,8 +16,8 @@
         </p>
         <p><strong>Masseur chat :</strong> {{ reservation.catLabel }}</p>
         {% if reservation.service and reservation.service.isRemoteLiveChat %}
-            <p style="margin-top: 12px;">
-                <a href="{{ path('app_live_chat', { reservationId: reservation.id }) }}" style="display: inline-block; background: #9b59b6; color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none;">Ouvrir le live chat</a>
+            <p style="margin-top: 0.75rem;">
+                <a href="{{ path('app_live_chat', { reservationId: reservation.id }) }}" class="btn btn-purple">Ouvrir le live chat</a>
             </p>
         {% endif %}
     </div>

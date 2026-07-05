@@ -3,6 +3,8 @@ namespace App\Dto;
 use App\Entity\Cat;
 use App\Entity\Location;
 use App\Entity\Service;
+use App\Serializer\SerializationGroups;
+use Symfony\Component\Serializer\Attribute\Groups;
 /**
  * DTO PrestationOffer : objet de transfert pour une offre de prestation complète.
  * Regroupe une prestation (Service), un salon (Location) et un chat masseur (Cat)
@@ -16,8 +18,11 @@ readonly class PrestationOffer
      * @param Cat $cat Le chat masseur qui la réalise
      */
     public function __construct(
+        #[Groups([SerializationGroups::API_READ])]
         public Service $service,
+        #[Groups([SerializationGroups::API_READ])]
         public Location $location,
+        #[Groups([SerializationGroups::API_READ])]
         public Cat $cat,
     ) {
     }
