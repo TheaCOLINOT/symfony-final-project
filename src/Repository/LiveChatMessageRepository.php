@@ -1,13 +1,13 @@
 <?php
-
 namespace App\Repository;
-
 use App\Entity\LiveChatMessage;
 use App\Entity\Reservation;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
+ * Repository pour les messages du live chat.
+ *
  * @extends ServiceEntityRepository<LiveChatMessage>
  */
 class LiveChatMessageRepository extends ServiceEntityRepository
@@ -18,7 +18,7 @@ class LiveChatMessageRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return list<LiveChatMessage>
+     * Tous les messages d'une réservation, du plus ancien au plus récent.
      */
     public function findByReservationOrdered(Reservation $reservation): array
     {

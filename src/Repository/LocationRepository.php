@@ -22,9 +22,8 @@ class LocationRepository extends ServiceEntityRepository
         return $this->findOneBy(['isGlobal' => true]);
     }
     /**
-     * Liste les salons physiques (ceux qui ne sont pas le global).
-     *
-     * @return list<Location>
+     * Liste les salons physiques pour le formulaire de recherche.
+     * On exclut le global et le lieu "À distance".
      */
     public function findCityLocations(): array
     {
@@ -37,7 +36,7 @@ class LocationRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    /** Lieu virtuel pour les prestations à distance. */
+    /** Lieu fictif "À distance" pour le live chat. */
     public function findRemoteLocation(): ?Location
     {
         return $this->findOneBy(['isRemote' => true]);

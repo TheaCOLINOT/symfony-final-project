@@ -22,6 +22,7 @@ final class ReservationFactoryService
      */
     public function assertOfferAvailable(Service $service, Location $location, Cat $cat): void
     {
+        // Cas particulier : live chat à distance
         if ($service->isRemoteLiveChat()) {
             $this->assertRemoteOfferAvailable($service, $location, $cat);
 
@@ -41,7 +42,10 @@ final class ReservationFactoryService
         }
     }
 
-    /** Live chat à distance : tous les chats, lieu virtuel uniquement. */
+    /**
+     * Pour le live chat : n'importe quel chat + lieu virtuel "À distance".
+     * Pas besoin que le chat soit dans un salon ou qu'il ait coché la prestation.
+     */
     public function assertRemoteOfferAvailable(Service $service, Location $location, Cat $cat): void
     {
         if (!$service->isRemoteLiveChat()) {
@@ -70,6 +74,8 @@ final class ReservationFactoryService
         $reservation->setService($service);
         $reservation->setLocation($location);
         $reservation->setReservationDate($reservationDate);
+
+        // On garde des libellés en dur au moment de la résa (si le catalogue change plus tard)
         $reservation->setServiceLabel($service->getTitle());
         $reservation->setCatLabel(sprintf(
             '%s (%s)',

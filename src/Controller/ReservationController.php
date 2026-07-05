@@ -128,7 +128,7 @@ final class ReservationController extends AbstractController
         return $this->redirectToRoute('app_user_reservations');
     }
 
-    // Réservation immédiate du live chat à distance (sans créneau)
+    // Page de confirmation avant de lancer le live chat (pas de créneau horaire)
     #[Route(
         '/reservation/live-chat/{serviceId}/{catId}',
         name: 'app_reservation_book_remote',
@@ -150,6 +150,7 @@ final class ReservationController extends AbstractController
             throw $this->createNotFoundException('Le live chat à distance n\'est pas disponible.');
         }
 
+        // Vérifie que c'est bien la bonne prestation + le bon chat
         $reservationFactory->assertRemoteOfferAvailable($service, $location, $cat);
 
         return $this->render('reservation/book_remote.html.twig', [
@@ -159,6 +160,7 @@ final class ReservationController extends AbstractController
         ]);
     }
 
+    // Enregistre la réservation live chat puis redirige vers la page de chat
     #[Route('/reservation/live-chat/valider', name: 'app_reservation_confirm_remote', methods: ['POST'])]
     public function confirmRemote(
         Request $request,
@@ -175,6 +177,7 @@ final class ReservationController extends AbstractController
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
         }
 
+        // IDs envoyés par le formulaire caché
         $serviceId = $request->request->getInt('service_id');
         $catId = $request->request->getInt('cat_id');
 
@@ -188,6 +191,7 @@ final class ReservationController extends AbstractController
             return $this->redirectToRoute('app_search');
         }
 
+        // Pas de date future : le live chat démarre tout de suite
         $reservationAt = new \DateTimeImmutable('now');
         $reservation = $reservationFactory->create($user, $service, $location, $cat, $reservationAt);
         $entityManager->persist($reservation);
@@ -195,6 +199,7 @@ final class ReservationController extends AbstractController
 
         $this->addFlash('success', 'Votre live chat avec le masseur chat est prêt. Miaou !');
 
+        // On envoie directement l'utilisateur sur la conversation
         return $this->redirectToRoute('app_live_chat', [
             'reservationId' => $reservation->getId(),
         ]);

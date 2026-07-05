@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Service;
-
 use App\Entity\LiveChatMessage;
 use App\Entity\Reservation;
 use App\Entity\User;
@@ -10,7 +8,9 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
- * Gère l'envoi de messages dans le live chat à distance.
+ * Service pour le live chat à distance.
+ * Quand l'utilisateur envoie un message, on enregistre sa réponse
+ * puis on génère automatiquement celle du chat masseur.
  */
 final class LiveChatService
 {
@@ -20,6 +20,7 @@ final class LiveChatService
     ) {
     }
 
+    // Vérifie que l'utilisateur connecté a le droit d'ouvrir ce chat
     public function assertCanAccess(Reservation $reservation, User $user): void
     {
         if ($reservation->getUser()?->getId() !== $user->getId()) {
@@ -32,54 +33,49 @@ final class LiveChatService
     }
 
     /**
-     * @return list<array{sender: string, content: string, createdAt: string}>
+     * Enregistre le message du client + la réponse auto du chat.
+     * Retourne un tableau simple pour le JSON du contrôleur.
      */
     public function sendUserMessage(Reservation $reservation, User $user, string $content): array
     {
         $this->assertCanAccess($reservation, $user);
 
-        $trimmed = trim($content);
-        if ($trimmed === '') {
+        $content = trim($content);
+        if ($content === '') {
             throw new BadRequestHttpException('Le message ne peut pas être vide.');
         }
 
-        $userMessage = $this->createMessage($reservation, LiveChatMessage::SENDER_USER, $trimmed);
-        $catMessage = $this->createMessage(
-            $reservation,
-            LiveChatMessage::SENDER_CAT,
-            $this->catKeyboardResponseService->generate(),
-        );
+        // Message écrit par l'utilisateur
+        $userMessage = new LiveChatMessage();
+        $userMessage->setReservation($reservation);
+        $userMessage->setSender(LiveChatMessage::SENDER_USER);
+        $userMessage->setContent($content);
+        $userMessage->setCreatedAt(new \DateTime());
+
+        // Réponse du chat (chaîne aléatoire générée par le service dédié)
+        $catReply = $this->catKeyboardResponseService->generate();
+        $catMessage = new LiveChatMessage();
+        $catMessage->setReservation($reservation);
+        $catMessage->setSender(LiveChatMessage::SENDER_CAT);
+        $catMessage->setContent($catReply);
+        $catMessage->setCreatedAt(new \DateTime());
 
         $this->entityManager->persist($userMessage);
         $this->entityManager->persist($catMessage);
         $this->entityManager->flush();
 
+        // Format attendu par le JavaScript côté navigateur
         return [
-            $this->serializeMessage($userMessage),
-            $this->serializeMessage($catMessage),
-        ];
-    }
-
-    private function createMessage(Reservation $reservation, string $sender, string $content): LiveChatMessage
-    {
-        $message = new LiveChatMessage();
-        $message->setReservation($reservation);
-        $message->setSender($sender);
-        $message->setContent($content);
-        $message->setCreatedAt(new \DateTime());
-
-        return $message;
-    }
-
-    /**
-     * @return array{sender: string, content: string, createdAt: string}
-     */
-    public function serializeMessage(LiveChatMessage $message): array
-    {
-        return [
-            'sender' => $message->getSender(),
-            'content' => $message->getContent(),
-            'createdAt' => $message->getCreatedAt()?->format('H:i') ?? '',
+            [
+                'sender' => $userMessage->getSender(),
+                'content' => $userMessage->getContent(),
+                'createdAt' => $userMessage->getCreatedAt()?->format('H:i') ?? '',
+            ],
+            [
+                'sender' => $catMessage->getSender(),
+                'content' => $catMessage->getContent(),
+                'createdAt' => $catMessage->getCreatedAt()?->format('H:i') ?? '',
+            ],
         ];
     }
 }

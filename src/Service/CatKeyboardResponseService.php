@@ -1,34 +1,36 @@
 <?php
-
 namespace App\Service;
 
 /**
- * Génère des réponses aléatoires comme si un chat tapait sur le clavier.
+ * Fabrique une fausse réponse de chat masseur.
+ * L'idée : des caractères au hasard, comme si le chat marchait sur le clavier.
  */
 final class CatKeyboardResponseService
 {
-    /** Caractères qu'un chat pourrait appuyer en marchant sur le clavier */
-    private const KEYBOARD_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789      ';
-
-    /** Petits mots que le chat pourrait produire par accident */
-    private const CAT_ACCIDENTS = ['mrrp', 'prrrt', 'miaou', 'rrr', 'paw', 'zzz'];
-
     public function generate(): string
     {
-        // Parfois le chat produit un mini-mot reconnaissable
-        if (random_int(1, 6) === 1) {
-            return self::CAT_ACCIDENTS[array_rand(self::CAT_ACCIDENTS)];
+        // De temps en temps le chat "dit" un truc reconnaissable
+        $hasard = random_int(1, 6);
+        if ($hasard === 1) {
+            $motsChat = ['mrrp', 'prrrt', 'miaou', 'rrr', 'paw', 'zzz'];
+
+            return $motsChat[array_rand($motsChat)];
         }
 
-        $length = random_int(6, 42);
-        $chars = self::KEYBOARD_CHARS;
-        $maxIndex = strlen($chars) - 1;
-        $result = '';
+        // Sinon on tape n'importe quoi au clavier
+        $touches = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789      ';
+        $longueur = random_int(6, 42);
+        $reponse = '';
 
-        for ($i = 0; $i < $length; ++$i) {
-            $result .= $chars[random_int(0, $maxIndex)];
+        for ($i = 0; $i < $longueur; $i++) {
+            $index = random_int(0, strlen($touches) - 1);
+            $reponse .= $touches[$index];
         }
 
-        return trim(preg_replace('/\s+/', ' ', $result) ?? $result);
+        // On enlève les espaces en trop au début / à la fin
+        $reponse = trim($reponse);
+        $reponse = preg_replace('/\s+/', ' ', $reponse);
+
+        return $reponse ?? '';
     }
 }

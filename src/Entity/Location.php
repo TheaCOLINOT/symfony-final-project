@@ -28,7 +28,7 @@ class Location
     #[ORM\Column(name: 'is_global', type: 'boolean')]
     private bool $isGlobal = false; // True si c'est la localisation globale (pas un salon physique)
     #[ORM\Column(name: 'is_remote', type: 'boolean')]
-    private bool $isRemote = false; // True si c'est le lieu virtuel pour les prestations à distance
+    private bool $isRemote = false; // True pour le lieu virtuel "À distance" (live chat)
     /**
      * @var Collection<int, Manager>
      */

@@ -122,9 +122,8 @@ class CatRepository extends ServiceEntityRepository
     }
 
     /**
-     * Tous les masseurs chats, y compris sans salon (pour le live chat à distance).
-     *
-     * @return list<Cat>
+     * Tous les masseurs chats, même ceux sans salon.
+     * Utile pour le live chat à distance.
      */
     public function findAllForRemoteLiveChat(): array
     {

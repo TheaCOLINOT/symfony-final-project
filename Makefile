@@ -29,6 +29,14 @@ maintenance:
 test:
 	docker compose exec php php bin/phpunit
 
+# Met à jour composer.lock sans démarrer toute la stack (Docker Desktop suffit)
+composer-update:
+	docker run --rm -v "$(CURDIR):/app" -w /app composer:2 composer update --no-interaction
+
+# Installe les deps localement dans vendor/ (utile si le conteneur php ne démarre pas)
+composer-install:
+	docker run --rm -v "$(CURDIR):/app" -w /app composer:2 composer install --no-interaction --no-scripts
+
 test-init:
 	docker compose exec database psql -U app -d app -tc "SELECT 1 FROM pg_database WHERE datname = 'app_test'" | findstr 1 >nul || docker compose exec database psql -U app -d app -c "CREATE DATABASE app_test;"
 	docker compose exec php php bin/console doctrine:migrations:migrate --no-interaction --env=test
@@ -64,5 +72,7 @@ help:
 	@echo "  maintenance - Expirer pending, compléter séjours, sync iCal"
 	@echo "  test     - Lancer PHPUnit"
 	@echo "  test-init - Préparer la BDD de test (app_test)"
+	@echo "  composer-install - composer install via image Docker (sans stack)"
+	@echo "  composer-update  - composer update via image Docker (sans stack)"
 	@echo "  logs     - Follow the logs of the PHP container"
 	@echo "  help     - Show this help message"

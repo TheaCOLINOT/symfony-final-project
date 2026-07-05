@@ -4,9 +4,15 @@
 /.env.local.php
 /.env.*.local
 .env
-*.lock
+/symfony.lock
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
 /var/
 /vendor/
+.phpunit.cache/
 ###< symfony/framework-bundle ###
+
+###> phpunit/phpunit ###
+/phpunit.xml
+/.phpunit.cache/
+###< phpunit/phpunit ###

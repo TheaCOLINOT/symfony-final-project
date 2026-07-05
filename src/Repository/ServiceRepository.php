@@ -58,9 +58,8 @@ class ServiceRepository extends ServiceEntityRepository
     }
 
     /**
-     * Prestations que les masseurs chats peuvent cocher (hors live chat automatique).
-     *
-     * @return list<Service>
+     * Prestations que les masseurs peuvent cocher dans leur espace.
+     * On exclut le live chat car il est automatique pour tout le monde.
      */
     public function findSelectableGlobalServices(): array
     {
@@ -72,7 +71,7 @@ class ServiceRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    /** Prestation spéciale live chat à distance. */
+    /** Récupère la prestation spéciale live chat (il n'y en a qu'une en base). */
     public function findRemoteLiveChatService(): ?Service
     {
         return $this->findOneBy(['isRemoteLiveChat' => true]);

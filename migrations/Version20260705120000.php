@@ -16,11 +16,14 @@ final class Version20260705120000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
+        // Colonnes pour repérer la prestation spéciale et le salon fictif "À distance"
         $this->addSql('ALTER TABLE service ADD COLUMN is_remote_live_chat BOOLEAN DEFAULT false NOT NULL');
         $this->addSql('ALTER TABLE location ADD COLUMN is_remote BOOLEAN DEFAULT false NOT NULL');
 
+        // Lieu virtuel utilisé dans les réservations live chat
         $this->addSql("INSERT INTO location (address, country, city, is_global, is_remote) VALUES ('En ligne', 'France', 'À distance', false, true)");
 
+        // Prestation créée une fois pour tout le réseau (accessible à tous les chats)
         $this->addSql("INSERT INTO service (title, description, duration, price, is_global, is_remote_live_chat) VALUES (
             'Live chat avec masseur chat',
             'Prestation à distance : échangez en direct avec votre masseur chat. Ses réponses sont générées spontanément, comme s''il marchait sur le clavier !',
@@ -30,6 +33,7 @@ final class Version20260705120000 extends AbstractMigration
             true
         )");
 
+        // Table qui stocke les messages du live chat
         $this->addSql('
             CREATE TABLE live_chat_message (
                 id SERIAL PRIMARY KEY,

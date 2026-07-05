@@ -62,6 +62,7 @@
 
 {% block javascripts %}
 <script>
+// Petit script pour envoyer les messages sans recharger la page
 (function () {
     const form = document.getElementById('chat-form');
     const input = document.getElementById('chat-input');
@@ -69,6 +70,7 @@
     const typingEl = document.getElementById('chat-typing');
     const emptyEl = document.getElementById('chat-empty');
 
+    // Ajoute une bulle de message dans la zone de chat
     function appendMessage(sender, content, createdAt) {
         if (emptyEl) {
             emptyEl.remove();
@@ -91,7 +93,7 @@
     }
 
     form.addEventListener('submit', async function (event) {
-        event.preventDefault();
+        event.preventDefault(); // important : sinon on voit le JSON brut
 
         const content = input.value.trim();
         if (content === '') {
@@ -101,7 +103,11 @@
         const formData = new FormData(form);
         formData.set('content', content);
         input.value = '';
-        appendMessage('user', content, new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }));
+
+        // On affiche tout de suite le message du client
+        const heure = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        appendMessage('user', content, heure);
+
         input.disabled = true;
         typingEl.style.display = 'block';
 
@@ -118,11 +124,17 @@
                 return;
             }
 
-            const catMessage = data.messages.find(function (message) {
-                return message.sender === 'cat';
-            });
+            // On cherche la réponse du chat dans le JSON renvoyé par Symfony
+            let catMessage = null;
+            for (let i = 0; i < data.messages.length; i++) {
+                if (data.messages[i].sender === 'cat') {
+                    catMessage = data.messages[i];
+                    break;
+                }
+            }
 
             if (catMessage) {
+                // Petite pause pour faire comme si le chat tapait
                 await new Promise(function (resolve) {
                     setTimeout(resolve, 600);
                 });

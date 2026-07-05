@@ -15,6 +15,7 @@ use Doctrine\ORM\QueryBuilder;
 /**
  * Service qui cherche les prestations qu'on peut réserver.
  * Il croise le salon, le type de massage et le masseur chat.
+ * Depuis le live chat, on ajoute aussi les offres à distance.
  */
 final class PrestationSearchService
 {
@@ -28,28 +29,29 @@ final class PrestationSearchService
 
     /**
      * Lance la recherche avec les filtres optionnels du formulaire.
-     *
-     * @return list<PrestationOffer>
      */
     public function search(?Location $location, ?Service $service, ?string $query): array
     {
         $normalizedQuery = $query !== null ? mb_strtolower(trim($query)) : '';
 
+        // Recherche classique dans les salons
         $offers = $this->searchInSalons($location, $service, $normalizedQuery);
+
+        // + la prestation spéciale live chat (tous les chats, à distance)
         $remoteOffers = $this->searchRemoteLiveChat($location, $service, $normalizedQuery);
 
         return array_merge($offers, $remoteOffers);
     }
 
-    /**
-     * @return list<PrestationOffer>
-     */
+    /** Recherche normale : salon + masseur + prestation cochée par le chat */
     private function searchInSalons(?Location $location, ?Service $service, string $normalizedQuery): array
     {
+        // Si on filtre sur un salon physique, pas de live chat dans les résultats
         if ($location !== null && $location->isRemote()) {
             return [];
         }
 
+        // Si on cherche une prestation précise qui n'est pas le live chat
         if ($service !== null && $service->isRemoteLiveChat()) {
             return [];
         }
@@ -79,9 +81,9 @@ final class PrestationSearchService
             $this->applyTextFilter($qb, $normalizedQuery);
         }
 
-        /** @var list<Cat> $cats */
         $cats = $qb->getQuery()->getResult();
 
+        // On fabrique la liste en PHP pour éviter les doublons
         $offers = [];
         $seen = [];
 
@@ -123,12 +125,12 @@ final class PrestationSearchService
     }
 
     /**
-     * Live chat à distance : tous les chats, sans salon ni lien service_cat.
-     *
-     * @return list<PrestationOffer>
+     * Live chat à distance : proposé par TOUS les chats, sans salon.
+     * Le masseur n'a même pas besoin de cocher la prestation.
      */
     private function searchRemoteLiveChat(?Location $location, ?Service $service, string $normalizedQuery): array
     {
+        // Filtre salon : si l'utilisateur a choisi Paris par ex., pas de live chat
         if ($location !== null && !$location->isRemote()) {
             return [];
         }
@@ -145,8 +147,9 @@ final class PrestationSearchService
         }
 
         $offers = [];
+        $allCats = $this->catRepository->findAllForRemoteLiveChat();
 
-        foreach ($this->catRepository->findAllForRemoteLiveChat() as $cat) {
+        foreach ($allCats as $cat) {
             if ($normalizedQuery !== '' && !$this->matchesRemoteText($remoteService, $cat, $normalizedQuery)) {
                 continue;
             }
@@ -174,7 +177,7 @@ final class PrestationSearchService
         )->setParameter('query', '%'.$normalizedQuery.'%');
     }
 
-    /** Vérifie en PHP si le texte correspond (au cas où) */
+    /** Vérifie en PHP si le texte correspond (pour les prestations en salon) */
     private function matchesText(Service $service, Location $location, Cat $cat, string $normalizedQuery): bool
     {
         $haystacks = [
@@ -186,8 +189,6 @@ final class PrestationSearchService
             $cat->getSpeciality(),
             $cat->getSpecie(),
             $cat->getColor(),
-            'à distance',
-            'live chat',
         ];
 
         foreach ($haystacks as $value) {
@@ -199,6 +200,7 @@ final class PrestationSearchService
         return false;
     }
 
+    /** Même principe mais pour le live chat à distance */
     private function matchesRemoteText(Service $service, Cat $cat, string $normalizedQuery): bool
     {
         $haystacks = [
@@ -207,6 +209,7 @@ final class PrestationSearchService
             Location::REMOTE_CITY,
             'en ligne',
             'live chat',
+            'à distance',
             $cat->getSpeciality(),
             $cat->getSpecie(),
             $cat->getColor(),
