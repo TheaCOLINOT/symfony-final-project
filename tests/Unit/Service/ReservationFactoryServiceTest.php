@@ -89,6 +89,6 @@ class ReservationFactoryServiceTest extends TestCase
         // Ne doit pas lever d'exception même sans salon ni prestation cochée
         $this->service->assertRemoteOfferAvailable($service, $location, $cat);
 
-        $this->assertTrue(true);
+        $this->expectNotToPerformAssertions();
     }
 }

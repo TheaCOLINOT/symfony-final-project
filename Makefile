@@ -32,6 +32,9 @@ maintenance:
 test:
 	docker compose exec php php bin/phpunit
 
+ci:
+	docker compose exec -T php composer ci
+
 # Met à jour composer.lock sans démarrer toute la stack (Docker Desktop suffit)
 composer-update:
 	docker run --rm -v "$(CURDIR):/app" -w /app composer:2 composer update --no-interaction
@@ -74,6 +77,7 @@ help:
 	@echo "  worker   - Consommer la file Messenger (emails async)"
 	@echo "  maintenance - Expirer pending, compléter séjours, sync iCal"
 	@echo "  test     - Lancer PHPUnit"
+	@echo "  ci       - Linter Symfony + PHPStan + PHPUnit (comme GitHub Actions)"
 	@echo "  test-init - Préparer la BDD de test (app_test)"
 	@echo "  composer-install - composer install via image Docker (sans stack)"
 	@echo "  composer-update  - composer update via image Docker (sans stack)"

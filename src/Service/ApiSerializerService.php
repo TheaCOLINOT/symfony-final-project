@@ -7,7 +7,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
-use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Serializer\Serializer;
 
 /**
  * Encapsule le Serializer Symfony avec un contexte API cohérent
@@ -16,7 +16,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 final class ApiSerializerService
 {
     public function __construct(
-        private readonly SerializerInterface $serializer,
+        private readonly Serializer $serializer,
     ) {
     }
 

@@ -167,14 +167,18 @@ class Location
      */
     public function addCat(Cat $cat): self
     {
-        return $cat->addLocation($this);
+        $cat->addLocation($this);
+
+        return $this;
     }
     /**
      * Retire un chat masseur du salon (délègue à Cat::removeLocation).
      */
     public function removeCat(Cat $cat): self
     {
-        return $cat->removeLocation($this);
+        $cat->removeLocation($this);
+
+        return $this;
     }
     /**
      * Retourne un libellé lisible pour l'affichage (ville + adresse ou "globale").

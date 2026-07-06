@@ -20,7 +20,7 @@ final class ReservationConfirmedNotification extends Notification implements Ema
         parent::__construct('Confirmation de réservation', ['email']);
     }
 
-    public function asEmailMessage(EmailRecipientInterface $recipient, ?string $transport = null): ?EmailMessage
+    public function asEmailMessage(EmailRecipientInterface $recipient, ?string $transport = null): EmailMessage
     {
         $email = NotificationEmail::asPublicEmail()
             ->to($recipient->getEmail())

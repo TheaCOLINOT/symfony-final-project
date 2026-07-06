@@ -20,7 +20,7 @@ final class UserRegisteredNotification extends Notification implements EmailNoti
         parent::__construct('Bienvenue sur Salon de Massage', ['email']);
     }
 
-    public function asEmailMessage(EmailRecipientInterface $recipient, ?string $transport = null): ?EmailMessage
+    public function asEmailMessage(EmailRecipientInterface $recipient, ?string $transport = null): EmailMessage
     {
         $email = NotificationEmail::asPublicEmail()
             ->to($recipient->getEmail())
