@@ -47,7 +47,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /** Retourne l'email de l'utilisateur. */
     public function getEmail(): ?string { return $this->email; }
     /** Définit l'email (utilisé pour la connexion). */
-    public function setEmail(string $email): self { $this->email = $email; return $this; }
+    public function setEmail(string $email): self
+    {
+        $this->email = mb_strtolower(trim($email));
+
+        return $this;
+    }
     /** Retourne le mot de passe hashé. */
     public function getPassword(): ?string { return $this->password; }
     /** Définit le mot de passe (doit être hashé avant). */

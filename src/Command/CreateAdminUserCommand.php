@@ -48,7 +48,7 @@ final class CreateAdminUserCommand extends Command
             return Command::SUCCESS;
         }
         // Création ou mise à jour de l'utilisateur admin
-        $admin = $this->userRepository->findOneBy(['email' => $this->adminEmail]);
+        $admin = $this->userRepository->findOneByEmail($this->adminEmail);
         if (!$admin instanceof User) {
             $admin = new User();
             $admin->setEmail($this->adminEmail);

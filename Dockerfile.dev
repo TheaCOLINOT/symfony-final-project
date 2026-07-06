@@ -2,6 +2,7 @@ FROM php:8.4-fpm-alpine
 
 RUN apk add --no-cache \
     postgresql-dev \
+    postgresql-client \
     git \
     unzip \
     curl \
@@ -9,6 +10,7 @@ RUN apk add --no-cache \
     libzip-dev \
     oniguruma-dev \
     icu-dev \
+    libxslt-dev \
     rabbitmq-c-dev
 
 RUN docker-php-ext-install \
@@ -18,7 +20,8 @@ RUN docker-php-ext-install \
     gd \
     zip \
     mbstring \
-    intl
+    intl \
+    xsl
 
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
     && pecl install apcu redis amqp \

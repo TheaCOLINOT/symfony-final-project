@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 
 install:
-	docker compose up -d --build
+	docker compose up -d --build --wait
 
 sh:
 	docker compose exec -it php sh
@@ -13,7 +13,10 @@ migrate:
 	docker compose exec -it php php bin/console doctrine:migrations:migrate --no-interaction
 
 fixtures:
-	docker compose exec -it php php bin/console doctrine:fixtures:load --no-interaction
+	docker compose up -d database php --wait
+	@echo "==> Attente de l'initialisation du conteneur PHP..."
+	@docker compose exec -T php sh -c 'for i in $$(seq 1 90); do [ -f /tmp/app-ready ] && exit 0; sleep 2; done; echo "Timeout: le conteneur PHP ne répond pas."; exit 1'
+	docker compose exec -T php php bin/console doctrine:fixtures:load --group=demo --no-interaction
 
 init: migrate fixtures
 	@echo "==> Base de données initialisée (migrations + fixtures)."
@@ -40,17 +43,17 @@ composer-install:
 test-init:
 	docker compose exec database psql -U app -d app -tc "SELECT 1 FROM pg_database WHERE datname = 'app_test'" | findstr 1 >nul || docker compose exec database psql -U app -d app -c "CREATE DATABASE app_test;"
 	docker compose exec php php bin/console doctrine:migrations:migrate --no-interaction --env=test
-	docker compose exec php php bin/console doctrine:fixtures:load --no-interaction --env=test
+	docker compose exec php php bin/console doctrine:fixtures:load --group=demo --no-interaction --env=test
 
 logs:
 	docker compose logs -f --tail=100 php
 
 up start:
-	docker compose up -d && \
+	docker compose up -d --wait && \
     echo "==> Les services ont été démarrés avec succès" && \
-    echo "==> Vous pouvez accéder à l'application : http://localhost:8089" && \
-    echo "==> Vous pouvez accéder à l'interface de la BDD : http://localhost:8088" && \
-    echo "==> Vous pouvez accéder à l'interface de mailpit : http://localhost:8025"
+    echo "==> Application : http://localhost:8091" && \
+    echo "==> Adminer (BDD) : http://localhost:8090" && \
+    echo "==> Mailpit (e-mails) : http://localhost:8026"
 
 down stop:
 	docker compose down

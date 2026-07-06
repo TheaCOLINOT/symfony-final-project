@@ -7,6 +7,8 @@
     <div class="auth-card">
         <h1>Créer un compte</h1>
         <form method="post">
+            <input type="hidden" name="_token" value="{{ csrf_token('register') }}">
+
             <label for="firstname">Prénom</label>
             <input type="text" name="firstname" id="firstname" required>
 
