@@ -74,7 +74,18 @@
         "post-update-cmd": [
             "@auto-scripts"
         ],
-        "test": "php bin/phpunit"
+        "test": "php bin/phpunit",
+        "lint": [
+            "@php bin/console lint:container --env=test",
+            "@php bin/console lint:twig templates/",
+            "@php bin/console lint:yaml config/ --parse-tags"
+        ],
+        "phpstan": "phpstan analyse --no-progress --memory-limit=512M",
+        "ci": [
+            "@lint",
+            "@phpstan",
+            "@test"
+        ]
     },
     "conflict": {
         "symfony/symfony": "*"
@@ -88,6 +99,9 @@
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^4.3",
         "fakerphp/faker": "^1.24",
+        "phpstan/phpstan": "^2.2.5",
+        "phpstan/phpstan-doctrine": "^2.0.27",
+        "phpstan/phpstan-symfony": "^2.0.20",
         "phpunit/phpunit": "^11.5.55",
         "symfony/maker-bundle": "^1.67",
         "symfony/phpunit-bridge": "8.1.*"

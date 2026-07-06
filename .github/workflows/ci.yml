@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+
+jobs:
+  quality:
+    name: Lint, PHPStan & Tests
+    runs-on: ubuntu-latest
+
+    env:
+      APP_ENV: test
+      DATABASE_URL: postgresql://app:app@127.0.0.1:5432/app_test?serverVersion=16&charset=utf8
+      MESSENGER_TRANSPORT_DSN: in-memory://
+      MAILER_DSN: null://null
+      MAILER_FROM: 'Salon de Massage <noreply@salon.local>'
+      OPENWEATHER_API_KEY: ''
+      OPENWEATHER_DEFAULT_CITY: Paris,FR
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: ctype, iconv, xsl, pdo_pgsql, intl, zip, mbstring
+          coverage: none
+          tools: composer:v2
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Symfony linter — container
+        run: php bin/console lint:container --env=test
+
+      - name: Symfony linter — Twig
+        run: php bin/console lint:twig templates/
+
+      - name: Symfony linter — YAML
+        run: php bin/console lint:yaml config/ --parse-tags
+
+      - name: PHPStan (level 5)
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=512M --configuration=phpstan.neon.dist
+
+      - name: PHPUnit
+        run: php bin/phpunit
