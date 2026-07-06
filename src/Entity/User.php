@@ -34,6 +34,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $role = null; // Rôle stocké en chaîne (ROLE_USER, ROLE_CAT, etc.)
     #[ORM\Column(name: 'subscribe_id', nullable: true)]
     private ?int $subscribeId = null; // Identifiant d'abonnement éventuel
+    #[ORM\Column(options: ['default' => false])]
+    private bool $isEmailVerified = false;
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $emailVerificationToken = null;
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $emailVerificationTokenExpiresAt = null;
     /** Retourne l'identifiant de l'utilisateur. */
     public function getId(): ?int { return $this->id; }
     /** Retourne le nom de famille. */
@@ -120,5 +126,41 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function eraseCredentials(): void
     {
         // Utile si vous stockez des données sensibles temporaires sur l'objet
+    }
+
+    public function isEmailVerified(): bool
+    {
+        return $this->isEmailVerified;
+    }
+
+    public function setIsEmailVerified(bool $isEmailVerified): self
+    {
+        $this->isEmailVerified = $isEmailVerified;
+
+        return $this;
+    }
+
+    public function getEmailVerificationToken(): ?string
+    {
+        return $this->emailVerificationToken;
+    }
+
+    public function setEmailVerificationToken(?string $emailVerificationToken): self
+    {
+        $this->emailVerificationToken = $emailVerificationToken;
+
+        return $this;
+    }
+
+    public function getEmailVerificationTokenExpiresAt(): ?\DateTimeImmutable
+    {
+        return $this->emailVerificationTokenExpiresAt;
+    }
+
+    public function setEmailVerificationTokenExpiresAt(?\DateTimeImmutable $emailVerificationTokenExpiresAt): self
+    {
+        $this->emailVerificationTokenExpiresAt = $emailVerificationTokenExpiresAt;
+
+        return $this;
     }
 }

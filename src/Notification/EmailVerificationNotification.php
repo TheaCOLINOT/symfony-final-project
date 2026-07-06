@@ -10,23 +10,27 @@ use Symfony\Component\Notifier\Notification\Notification;
 use Symfony\Component\Notifier\Recipient\EmailRecipientInterface;
 
 /**
- * E-mail transactionnel de bienvenue après inscription.
+ * E-mail de validation d'inscription avec lien de confirmation.
  */
-final class UserRegisteredNotification extends Notification implements EmailNotificationInterface
+final class EmailVerificationNotification extends Notification implements EmailNotificationInterface
 {
     public function __construct(
         private readonly User $user,
+        private readonly string $verificationUrl,
     ) {
-        parent::__construct('Bienvenue sur Salon de Massage', ['email']);
+        parent::__construct('Confirmez votre inscription', ['email']);
     }
 
     public function asEmailMessage(EmailRecipientInterface $recipient, ?string $transport = null): EmailMessage
     {
         $email = NotificationEmail::asPublicEmail()
             ->to($recipient->getEmail())
-            ->subject('Confirmation de votre inscription')
-            ->htmlTemplate('email/user_registered.html.twig')
-            ->context(['user' => $this->user]);
+            ->subject('Confirmez votre inscription — Salon de Massage')
+            ->htmlTemplate('email/email_verification.html.twig')
+            ->context([
+                'user' => $this->user,
+                'verificationUrl' => $this->verificationUrl,
+            ]);
 
         return new EmailMessage($email);
     }

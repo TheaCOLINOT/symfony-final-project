@@ -226,6 +226,7 @@ final class AppFixtures extends Fixture implements FixtureGroupInterface
       $user->setPhone($phone);
       $user->setUserRole($role);
       $user->setPassword($this->passwordHasher->hashPassword($user, $plainPassword));
+      $user->setIsEmailVerified(true);
 
       return $user;
   }

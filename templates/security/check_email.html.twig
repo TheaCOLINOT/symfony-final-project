@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Confirmez votre e-mail{% endblock %}
+
+{% block body %}
+<div class="auth-page">
+    <div class="auth-card">
+        <h1>Consultez votre e-mail</h1>
+
+        <p>Un message de confirmation a été envoyé à <strong>{{ email }}</strong>.</p>
+
+        <p>Cliquez sur le lien dans l'e-mail pour activer votre compte, puis connectez-vous.</p>
+
+        <form method="post" action="{{ path('app_verify_email_resend') }}" style="margin-top: 1.5rem;">
+            <input type="hidden" name="email" value="{{ email }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('resend_verification') }}">
+            <button type="submit" class="btn-secondary">Renvoyer l'e-mail de confirmation</button>
+        </form>
+
+        <p class="auth-footer" style="margin-top: 1.5rem;">
+            <a href="{{ path('app_login') }}">Retour à la connexion</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

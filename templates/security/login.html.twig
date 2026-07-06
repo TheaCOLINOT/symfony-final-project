@@ -26,5 +26,15 @@
         </form>
     </div>
     <p class="auth-footer">Pas encore de compte ? <a href="{{ path('app_register') }}">Inscrivez-vous</a></p>
+
+    <div class="auth-card" style="margin-top: 1rem;">
+        <p class="muted" style="margin-bottom: 0.75rem;">Compte non confirmé ?</p>
+        <form method="post" action="{{ path('app_verify_email_resend') }}">
+            <label for="resend-email">Renvoyer l'e-mail de confirmation</label>
+            <input type="email" name="email" id="resend-email" value="{{ last_username }}" placeholder="votre@email.fr" required>
+            <input type="hidden" name="_token" value="{{ csrf_token('resend_verification') }}">
+            <button type="submit" class="btn-secondary" style="margin-top: 0.75rem;">Renvoyer</button>
+        </form>
+    </div>
 </div>
 {% endblock %}

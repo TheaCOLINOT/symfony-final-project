@@ -56,9 +56,11 @@ final class CreateAdminUserCommand extends Command
             $admin->setFirstname('Super');
             $admin->setUserRole(UserRole::Manager);
             $admin->setPassword($this->passwordHasher->hashPassword($admin, $this->adminPassword));
+            $admin->setIsEmailVerified(true);
             $this->entityManager->persist($admin);
         } else {
             $admin->setUserRole(UserRole::Manager);
+            $admin->setIsEmailVerified(true);
         }
         // Profil Manager avec le flag isAdmin pour les droits globaux
         $manager = $this->managerRepository->findOneByUser($admin);
